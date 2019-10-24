@@ -41,8 +41,9 @@ public class TrecDocRetriever {
     String kdeType;
     boolean postRLMQE;
     boolean postQERerank;
+    Similarity model;
     
-    public TrecDocRetriever(String propFile) throws Exception {
+    public TrecDocRetriever(String propFile, Similarity sim) throws Exception {        
         indexer = new TrecDocIndexer(propFile);
         prop = indexer.getProperties();
         
@@ -53,8 +54,8 @@ public class TrecDocRetriever {
             reader = DirectoryReader.open(FSDirectory.open(indexDir.toPath()));
             searcher = new IndexSearcher(reader);
             
-            float lambda = Float.parseFloat(prop.getProperty("lm.lambda", "0.4"));
-            searcher.setSimilarity(new LMJelinekMercerSimilarity(lambda));
+            this.model = sim;
+            searcher.setSimilarity(sim);
             
             numWanted = Integer.parseInt(prop.getProperty("retrieve.num_wanted", "1000"));
             runName = prop.getProperty("retrieve.runname", "lm");
@@ -64,10 +65,6 @@ public class TrecDocRetriever {
         catch (Exception ex) {
             ex.printStackTrace();
         }        
-    }
-    
-    public TopDocs rerank(Query q, TopDocs topDocs) throws Exception {
-        return topDocs;
     }
     
     public Properties getProperties() { return prop; }
@@ -151,9 +148,12 @@ public class TrecDocRetriever {
         }
         return kldiv;
     }
+
+    TopDocs retrieve(TRECQuery query) throws IOException {
+        return searcher.search(query.getLuceneQueryObj(), numWanted);
+    }
     
     public void retrieveAll() throws Exception {
-        TopScoreDocCollector collector;
         TopDocs topDocs;
         String resultsFile = prop.getProperty("res.file");        
         FileWriter fw = new FileWriter(resultsFile);
@@ -163,13 +163,10 @@ public class TrecDocRetriever {
         for (TRECQuery query : queries) {
 
             // Print query
-            System.out.println(query.getLuceneQueryObj());
+            System.out.println("Executing query: " + query.getLuceneQueryObj());
             
             // Retrieve results
-            collector = TopScoreDocCollector.create(numWanted);
-            searcher.search(query.getLuceneQueryObj(), collector);
-            topDocs = collector.topDocs();
-            System.out.println("Retrieved results for query " + query.id);
+            topDocs = retrieve(query);
 
             // Apply feedback
             if (Boolean.parseBoolean(prop.getProperty("feedback")) && topDocs.scoreDocs.length > 0) {
@@ -179,6 +176,7 @@ public class TrecDocRetriever {
             // Save results
             saveRetrievedTuples(fw, query, topDocs);
         }
+        
         fw.close();        
         reader.close();
         
@@ -205,6 +203,8 @@ public class TrecDocRetriever {
             else
                 System.out.println("Clarity: " + fdbkModel.getQueryClarity());
         }
+        
+        
         
         postRLMQE = Boolean.parseBoolean(prop.getProperty("rlm.qe", "false"));
         TopDocs reranked = fdbkModel.rerankDocs();
@@ -250,8 +250,9 @@ public class TrecDocRetriever {
             args = new String[1];
             args[0] = "init.properties";
         }
+        
         try {
-            TrecDocRetriever searcher = new TrecDocRetriever(args[0]);
+            TrecDocRetriever searcher = new TrecDocRetriever(args[0], new LMJelinekMercerSimilarity(0.4f));            
             searcher.retrieveAll();            
         }
         catch (Exception ex) {
