@@ -21,25 +21,25 @@
 <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analyzers-common</artifactId>
-    <version>5.1.0</version>
+    <version>5.3.1</version>
 </dependency>
 <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-queryparser -->
 <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-queryparser</artifactId>
-    <version>5.1.0</version>
+    <version>5.3.1</version>
 </dependency>
 <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-queries -->
 <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-queries</artifactId>
-    <version>5.1.0</version>
+    <version>5.3.1</version>
 </dependency>
 <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-codecs -->
 <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-codecs</artifactId>
-    <version>5.1.0</version>
+    <version>5.3.1</version>
     <scope>test</scope>
 </dependency>    
 <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
