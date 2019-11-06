@@ -75,8 +75,8 @@ public class RetrievedDocsTermStats {
             return null;
         
         // Construct the normalized tf vector
-        termsEnum = tfvector.iterator(null); // access the terms for this field
-        
+        termsEnum = tfvector.iterator(); // access the terms for this field
+        //termsEnum = tfvector.iterator(null);
     	while ((term = termsEnum.next()) != null) { // explore the terms for this field
             termText = term.utf8ToString();
             tf = (int)termsEnum.totalTermFreq();
