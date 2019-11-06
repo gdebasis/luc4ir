@@ -19,9 +19,11 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.Weight;
 import org.luc4ir.indexing.TrecDocIndexer;
 import org.luc4ir.trec.TRECQuery;
 import org.luc4ir.retriever.TrecDocRetriever;
@@ -186,7 +188,11 @@ public class RelevanceModelIId {
         
         TRECQuery expandedQuery = new TRECQuery(this.trecQuery);
         Set<Term> origTerms = new HashSet<Term>();
-        this.trecQuery.luceneQuery.extractTerms(origTerms);
+        IndexSearcher searcher = new IndexSearcher(reader);
+        Weight w1 = searcher.createWeight(this.trecQuery.luceneQuery, true);
+        w1.extractTerms(origTerms);
+        //this.trecQuery.luceneQuery.extractTerms(origTerms);
+        //this.trecQuery.luceneQuery.
         expandedQuery.luceneQuery = new BooleanQuery();
         HashMap<String, String> origQueryWordStrings = new HashMap<>();
         

@@ -16,6 +16,7 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.Weight;
 
 /**
  *
@@ -46,7 +47,13 @@ public class TRECQuery {
 
     public Set<Term> getQueryTerms() {
         Set<Term> terms = new HashSet<>();
-        luceneQuery.extractTerms(terms);
+       // Weight w = searcher.createWeight(true, 3.4f);
+        //w.extractTerms(terms);
+        String st[] = luceneQuery.toString().split("\\s+");
+        for(String s: st){
+            terms.add(new Term("words", s));
+        }
+        //luceneQuery.extractTerms(terms);
         return terms;
     }
 }
