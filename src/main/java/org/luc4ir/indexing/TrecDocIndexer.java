@@ -6,11 +6,16 @@ package org.luc4ir.indexing;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.zip.GZIPInputStream;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
@@ -22,6 +27,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  *
@@ -30,6 +36,8 @@ import org.jsoup.select.Elements;
 
 public class TrecDocIndexer {
     Properties prop;
+    String saxparser;
+    
     File indexDir;
     IndexWriter writer;
     Analyzer analyzer;
@@ -69,6 +77,8 @@ public class TrecDocIndexer {
         analyzer = constructAnalyzer();            
         String indexPath = prop.getProperty("index");        
         indexDir = new File(indexPath);
+        // generic or structured
+        saxparser = prop.getProperty("sax.parser", "generic");        
     }
     
     public Analyzer getAnalyzer() { return analyzer; }
@@ -126,19 +136,39 @@ public class TrecDocIndexer {
     }
 
     void indexFile(File file) throws Exception {
-        FileReader fr = new FileReader(file);
-        BufferedReader br = new BufferedReader(fr);
-        String line;
-        Document doc;
-
         System.out.println("Indexing file: " + file.getName());
         
-        StringBuffer txtbuff = new StringBuffer();
-        while ((line = br.readLine()) != null)
-            txtbuff.append(line).append("\n");
-        String content = txtbuff.toString();
+        InputStream is = !file.getName().endsWith("gz")?
+                        new FileInputStream(file):
+                        new GZIPInputStream(new FileInputStream(file));
+        
+        if (saxparser!=null)
+            indexFileWithSAX(is);
+        else
+            indexFileWithDOM(is);
+        
+        if (is!=null)
+            is.close();
+    }
 
-        org.jsoup.nodes.Document jdoc = Jsoup.parse(content);
+    void indexFileWithSAX(InputStream is) throws Exception {
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        SAXParser saxParser = factory.newSAXParser();        
+        DefaultHandler handler;
+        
+        String docStartTag = prop.getProperty("sax.docstart");
+        String docIdTag = prop.getProperty("sax.docid");
+        String contentTags = prop.getProperty("sax.content_tags");
+        handler = new GenericSAXParserHandler(writer, docStartTag, docIdTag, contentTags);
+            
+        saxParser.parse(is, handler);        
+    }
+    
+    
+    void indexFileWithDOM(InputStream is) throws Exception {
+        Document doc;
+
+        org.jsoup.nodes.Document jdoc = Jsoup.parse(is, "UTF-8", "");
         Elements docElts = jdoc.select("DOC");
 
         for (Element docElt : docElts) {

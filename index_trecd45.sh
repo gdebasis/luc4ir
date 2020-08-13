@@ -2,7 +2,7 @@
 
 if [ $# -lt 2 ]
 then
-	echo "usage: $0 <collection path> <path to write out index>>"
+	echo "usage: $0 <collection path> <path to write out index>"
 	exit
 fi
 
