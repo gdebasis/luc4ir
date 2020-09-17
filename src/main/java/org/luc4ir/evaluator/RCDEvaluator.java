@@ -45,7 +45,7 @@ public class RCDEvaluator {
     Map<String, List<String>> equivQueries;
     Map<String, PredRelPair> predRelPairs;
     
-    static public final int N = 5;
+    static public int N = 5;
 
     RCDEvaluator(String predRelTsv, String equivFile) throws Exception {
         loadEquivQueries(equivFile);
@@ -86,7 +86,9 @@ public class RCDEvaluator {
         }
     }
     
-    void printAvgNGramMatchStats() {
+    float printAvgNGramMatchStats(int ngramValue) {
+        N = ngramValue;
+        
         float avg = 0;
         int numEvaluated = 0;
         boolean evaluate;
@@ -125,7 +127,9 @@ public class RCDEvaluator {
             numEvaluated++;
         }
         
-        System.out.println("Avg. NGram Cosine-Sim = " + avg/(float)numEvaluated);
+        avg = avg/(float)numEvaluated;
+        System.out.println(String.format("Avg. %d-gram Cosine-Sim = %.4f", N, avg));
+        return avg;
     }
 
     public static void main(String[] args) {
@@ -134,14 +138,21 @@ public class RCDEvaluator {
             System.err.println("Evaluating on default arguments");
 
             // else demo on the sample provide...
-            args = new String[2];
+            args = new String[3];
             args[0] = "rcd/pred_rel.txt";
             args[1] = "rcd/equiv.txt";  // ths would only be present after u run the index
         }
         
         try {
             RCDEvaluator rcdeval = new RCDEvaluator(args[0], args[1]);
-            rcdeval.printAvgNGramMatchStats();
+            float n_sum = 12.0f; // 3+4+5=12
+            float wavg = 0;
+            for (int n=3; n<=5; n++) {
+                float w = n/n_sum; // the higher the n the higher the weight
+                float val = rcdeval.printAvgNGramMatchStats(n);
+                wavg += w*val;
+            }
+            System.out.println("BLEU = " + wavg);
         }
         catch (Exception ex) {
             ex.printStackTrace();
