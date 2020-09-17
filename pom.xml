@@ -106,6 +106,15 @@
             <configuration>
                 <mainClass>org.luc4ir.retriever.DocViewer</mainClass>
             </configuration>
+        </execution>
+        <execution>
+            <id>rcd_task1_eval</id>
+            <goals>
+                <goal>java</goal>
+            </goals>
+            <configuration>
+                <mainClass>org.luc4ir.evaluator.RCDEvaluator</mainClass>
+            </configuration>
         </execution>        
         </executions>       
     </plugin>
