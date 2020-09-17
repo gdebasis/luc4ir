@@ -7,6 +7,11 @@ package org.luc4ir.retriever;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
+import org.apache.james.mime4j.Charsets;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -41,7 +46,35 @@ public class DocViewer {
         return d.get(TrecDocIndexer.FIELD_ANALYZED_CONTENT);
     }
     
+    void close() throws Exception {
+        reader.close();
+    }
+    
     public static void main(String[] args) {
+        // Read a file of <qids> <docids> (useful for a pool) and display the text
+        if (args.length < 2) {
+            System.err.println("usage: java DocViewer <two column id file - first vol - qid, sedond docid> <indexdir>");
+            System.err.println("Evaluating on sample TREC docids");            
+            
+            // else demo on the sample provide...
+            args = new String[2];
+            args[0] = "sample.res";
+            args[1] = "index_trecd45";  // ths would only be present after u run the index
+        }
+        
+        try {
+            List<String> lines = FileUtils.readLines(new File(args[0]), Charsets.UTF_8);
+            DocViewer dv = new DocViewer(args[1]);
+            for (String line: lines) {
+                String[] tokens = line.split("\\s+");
+                String text = dv.getDocText(tokens[1]);
+                System.out.println(String.format("%s\t%s\t%s", tokens[0], tokens[1], text));
+            }
+            dv.close();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
         
     }
 }

@@ -98,6 +98,15 @@
                 <mainClass>org.luc4ir.retriever.TrecDocRetriever</mainClass>
             </configuration>
         </execution>
+        <execution>
+            <id>view</id>
+            <goals>
+                <goal>java</goal>
+            </goals>
+            <configuration>
+                <mainClass>org.luc4ir.retriever.DocViewer</mainClass>
+            </configuration>
+        </execution>        
         </executions>       
     </plugin>
     </plugins>

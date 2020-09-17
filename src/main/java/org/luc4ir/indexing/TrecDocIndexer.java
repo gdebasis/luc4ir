@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -17,8 +18,10 @@ import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
@@ -78,7 +81,7 @@ public class TrecDocIndexer {
         String indexPath = prop.getProperty("index");        
         indexDir = new File(indexPath);
         // generic or structured
-        saxparser = prop.getProperty("sax.parser", "generic");        
+        saxparser = prop.getProperty("sax.parser");        
     }
     
     public Analyzer getAnalyzer() { return analyzer; }
@@ -142,9 +145,9 @@ public class TrecDocIndexer {
                         new FileInputStream(file):
                         new GZIPInputStream(new FileInputStream(file));
         
-        if (saxparser!=null)
+        if (saxparser.equals("generic"))
             indexFileWithSAX(is);
-        else
+        else // put 'dom'... any other string also works!
             indexFileWithDOM(is);
         
         if (is!=null)
@@ -177,6 +180,32 @@ public class TrecDocIndexer {
             writer.addDocument(doc);
         }
     }
+    
+    public static String analyze(Analyzer analyzer, String query) {
+
+        StringBuffer buff = new StringBuffer();
+        try {
+            TokenStream stream = analyzer.tokenStream("dummy", new StringReader(query));
+            CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
+            stream.reset();
+            while (stream.incrementToken()) {
+                String term = termAtt.toString();
+                buff.append(term).append(" ");
+            }
+            stream.end();
+            stream.close();
+
+            if (buff.length()>0)
+                buff.deleteCharAt(buff.length()-1);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+
+        return buff.toString();
+    }
+    
 
     public static void main(String[] args) {
         if (args.length == 0) {
