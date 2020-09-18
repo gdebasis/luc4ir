@@ -107,8 +107,9 @@ public class TrecDocIndexer {
                 InputStreamReader isr = new InputStreamReader(tarInput);
                 BufferedReader br = new BufferedReader(isr); // Read directly from tarInput
                 String tarEntryName =  currentEntry.getName();
+                String fileName = new File(tarEntryName).getName();
                 
-                if (tarEntryName.charAt(0) != '.') {                
+                if (fileName.charAt(0) != '.') {                
                     System.out.println("Indexing file: " + tarEntryName);
                     while ((line = br.readLine()) != null) {
                         buff.append(line).append("\n");
