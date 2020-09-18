@@ -5,18 +5,24 @@
 package org.luc4ir.indexing;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.StopFilter;
@@ -87,6 +93,37 @@ public class TrecDocIndexer {
     public Analyzer getAnalyzer() { return analyzer; }
     
     public Properties getProperties() { return prop; }
+ 
+    public void indexTarGz() {
+        String tarGzippedFile = prop.getProperty("coll");
+        
+        try {
+            String line;
+            StringBuffer buff = new StringBuffer();
+            TarArchiveInputStream tarInput = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(tarGzippedFile)));
+            TarArchiveEntry currentEntry = tarInput.getNextTarEntry();
+            
+            while (currentEntry != null) {
+                InputStreamReader isr = new InputStreamReader(tarInput);
+                BufferedReader br = new BufferedReader(isr); // Read directly from tarInput
+                String tarEntryName =  currentEntry.getName();
+                
+                if (tarEntryName.charAt(0) != '.') {                
+                    System.out.println("Indexing file: " + tarEntryName);
+                    while ((line = br.readLine()) != null) {
+                        buff.append(line).append("\n");
+                    }
+                    indexFileWithDOM(buff.toString());
+                }
+                
+                currentEntry = tarInput.getNextTarEntry(); // iterate to the next file
+                buff.setLength(0); // clear buffer
+            }
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
     
     void processAll() throws Exception {
         System.out.println("Indexing TREC collection...");
@@ -95,8 +132,13 @@ public class TrecDocIndexer {
         iwcfg.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
 
         writer = new IndexWriter(FSDirectory.open(indexDir.toPath()), iwcfg);
+
+        String collType = prop.getProperty("colltype", "fsdir");  // fsdir/targz
         
-        indexAll();
+        if (collType.equals("fsdir"))
+            indexAll();
+        else
+            indexTarGz();
         
         writer.close();
     }
@@ -167,10 +209,23 @@ public class TrecDocIndexer {
         saxParser.parse(is, handler);        
     }
     
-    
     void indexFileWithDOM(InputStream is) throws Exception {
         Document doc;
 
+        org.jsoup.nodes.Document jdoc = Jsoup.parse(is, "UTF-8", "");
+        Elements docElts = jdoc.select("DOC");
+
+        for (Element docElt : docElts) {
+            Element docIdElt = docElt.select("DOCNO").first();
+            doc = constructDoc(docIdElt.text(), docElt.text());
+            writer.addDocument(doc);
+        }
+    }
+    
+    void indexFileWithDOM(String text) throws Exception {
+        Document doc;
+
+        InputStream is = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
         org.jsoup.nodes.Document jdoc = Jsoup.parse(is, "UTF-8", "");
         Elements docElts = jdoc.select("DOC");
 
@@ -206,7 +261,6 @@ public class TrecDocIndexer {
         return buff.toString();
     }
     
-
     public static void main(String[] args) {
         if (args.length == 0) {
             args = new String[1];
@@ -216,7 +270,7 @@ public class TrecDocIndexer {
 
         try {
             TrecDocIndexer indexer = new TrecDocIndexer(args[0]);
-            indexer.processAll();
+            indexer.processAll();            
         }
         catch (Exception ex) {
             ex.printStackTrace();
