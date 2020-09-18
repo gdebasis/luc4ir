@@ -45,7 +45,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class TrecDocIndexer {
     Properties prop;
-    String saxparser;
+    String parser;
     
     File indexDir;
     IndexWriter writer;
@@ -87,7 +87,7 @@ public class TrecDocIndexer {
         String indexPath = prop.getProperty("index");        
         indexDir = new File(indexPath);
         // generic or structured
-        saxparser = prop.getProperty("sax.parser");        
+        parser = prop.getProperty("parser");        
     }
     
     public Analyzer getAnalyzer() { return analyzer; }
@@ -188,13 +188,43 @@ public class TrecDocIndexer {
                         new FileInputStream(file):
                         new GZIPInputStream(new FileInputStream(file));
         
-        if (saxparser.equals("generic"))
+        if (parser.equals("generic"))
             indexFileWithSAX(is);
-        else // put 'dom'... any other string also works!
+        else if (parser.equals("line"))
+            indexFileWithLineReader(is);
+        else // put 'dom'... any other string (e.g. 'none') also works!
             indexFileWithDOM(is);
         
         if (is!=null)
             is.close();
+    }
+    
+    void indexFileWithLineReader(InputStream is) throws Exception {
+        Document doc;
+        String id = null;
+        StringBuffer contentBuff = new StringBuffer();
+        String line;
+        boolean startAccumulating = false;
+        
+        BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+        
+        while ((line = br.readLine())!= null) {
+            line = line.trim();
+            if (line.startsWith("<pno>")) {
+                id = line.split("\\s+")[1];
+                startAccumulating = true;
+            }
+            else if (line.equals("</p>")) {
+                doc = constructDoc(id, contentBuff.toString());
+                writer.addDocument(doc);
+                contentBuff.setLength(0); // clear buffer
+                startAccumulating = false;
+            }
+            else if (startAccumulating) {
+                line = removeTags(line);
+                contentBuff.append(line).append("\n");
+            }
+        }
     }
 
     void indexFileWithSAX(InputStream is) throws Exception {
@@ -260,6 +290,10 @@ public class TrecDocIndexer {
         }
 
         return buff.toString();
+    }
+    
+    static String removeTags(String txt) {
+        return Jsoup.parse(txt).text();
     }
     
     public static void main(String[] args) {

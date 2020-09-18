@@ -1,0 +1,254 @@
+<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.10/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.10/ http://www.mediawiki.org/xml/export-0.10.xsd" version="0.10" xml:lang="en">
+  <siteinfo>
+    <sitename>Wikipedia</sitename>
+    <dbname>enwiki</dbname>
+    <base>https://en.wikipedia.org/wiki/Main_Page</base>
+    <generator>MediaWiki 1.34.0-wmf.24</generator>
+    <case>first-letter</case>
+    <namespaces>
+      <namespace key="-2" case="first-letter">Media</namespace>
+      <namespace key="-1" case="first-letter">Special</namespace>
+      <namespace key="0" case="first-letter" />
+      <namespace key="1" case="first-letter">Talk</namespace>
+      <namespace key="2" case="first-letter">User</namespace>
+      <namespace key="3" case="first-letter">User talk</namespace>
+      <namespace key="4" case="first-letter">Wikipedia</namespace>
+      <namespace key="5" case="first-letter">Wikipedia talk</namespace>
+      <namespace key="6" case="first-letter">File</namespace>
+      <namespace key="7" case="first-letter">File talk</namespace>
+      <namespace key="8" case="first-letter">MediaWiki</namespace>
+      <namespace key="9" case="first-letter">MediaWiki talk</namespace>
+      <namespace key="10" case="first-letter">Template</namespace>
+      <namespace key="11" case="first-letter">Template talk</namespace>
+      <namespace key="12" case="first-letter">Help</namespace>
+      <namespace key="13" case="first-letter">Help talk</namespace>
+      <namespace key="14" case="first-letter">Category</namespace>
+      <namespace key="15" case="first-letter">Category talk</namespace>
+      <namespace key="100" case="first-letter">Portal</namespace>
+      <namespace key="101" case="first-letter">Portal talk</namespace>
+      <namespace key="108" case="first-letter">Book</namespace>
+      <namespace key="109" case="first-letter">Book talk</namespace>
+      <namespace key="118" case="first-letter">Draft</namespace>
+      <namespace key="119" case="first-letter">Draft talk</namespace>
+      <namespace key="446" case="first-letter">Education Program</namespace>
+      <namespace key="447" case="first-letter">Education Program talk</namespace>
+      <namespace key="710" case="first-letter">TimedText</namespace>
+      <namespace key="711" case="first-letter">TimedText talk</namespace>
+      <namespace key="828" case="first-letter">Module</namespace>
+      <namespace key="829" case="first-letter">Module talk</namespace>
+      <namespace key="2300" case="first-letter">Gadget</namespace>
+      <namespace key="2301" case="first-letter">Gadget talk</namespace>
+      <namespace key="2302" case="case-sensitive">Gadget definition</namespace>
+      <namespace key="2303" case="case-sensitive">Gadget definition talk</namespace>
+    </namespaces>
+  </siteinfo>
+<doc>
+ <docno> 1 </docno>
+<page>
+<p>
+ <pno> 1-1 </pno>
+    <title>AccessibleComputing</title>
+    <ns>0</ns>
+    <id>10</id>
+    <redirect title="Computer accessibility" />
+    <revision>
+      <id>854851586</id>
+      <parentid>834079434</parentid>
+      <timestamp>2018-08-14T06:47:24Z</timestamp>
+      <contributor>
+        <username>Godsy</username>
+        <id>23257138</id>
+      </contributor>
+      <comment>remove from category for seeking instructions on rcats</comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve">#REDIRECT [[Computer accessibility]]
+</p>
+ <p>
+ <pno> 1-2 </pno>
+{{R from move}}
+{{R from CamelCase}}
+{{R unprintworthy}}</text>
+      <sha1>42l0cvblwtb4nnupxm6wo000d27t6kf</sha1>
+    </revision>
+</p>
+</page>
+</doc>
+<doc>
+ <docno> 2 </docno>
+<page>
+<p>
+ <pno> 2-1 </pno>
+    <title>Anarchism</title>
+    <ns>0</ns>
+    <id>12</id>
+    <revision>
+      <id>918470367</id>
+      <parentid>918111101</parentid>
+      <timestamp>2019-09-28T20:40:50Z</timestamp>
+      <contributor>
+        <username>Brainulator9</username>
+        <id>11191612</id>
+      </contributor>
+      <comment>/* Sources */Remove redundant |year= parameter from CS1 citations;</comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text xml:space="preserve">{{good article}}
+{{redirect2|Anarchist|Anarchists|other uses|Anarchists (disambiguation)}}
+{{pp-move-indef}}
+{{short description|Political philosophy that advocates self-governed societies}}
+{{use dmy dates|date=July 2018}}
+{{use British English|date=January 2014}}
+{{anarchism sidebar}}
+{{basic forms of government}}
+'''Anarchism''' is an [[Anti-authoritarianism|anti-authoritarian]] [[political philosophy]]{{sfnm|1a1=McLaughlin|1y=2007|1p=59|2a1=Flint|2y=2009|2p=27}} that rejects [[Hierarchy|hierarchies]] deemed unjust and advocates their replacement with [[Workers' self-management|self-managed]], [[Self-governance|self-governed]] societies based on voluntary, [[cooperative]] institutions. These institutions are often described as [[Stateless society|stateless societies]],{{sfnm|1a1=Sheehan|1y=2003|1p=85|2a1=Craig|2y=2005|2p=14}} although several authors have defined them more specifically as distinct institutions based on non-hierarchical or [[Free association (communism and anarchism)|free associations]].{{sfn|Suissa|2006|p=7}} Anarchism's central disagreement with other ideologies is that it holds the [[Sovereign state|state]] to be undesirable, unnecessary, and harmful.{{sfnm|1a1=McLean|1a2=McMillan|1y=2003|loc=Anarchism|2a1=Craig|2y=2005|2p=14}}
+</p>
+ <p>
+ <pno> 2-2 </pno>
+Anarchism is usually placed on the [[Far-left politics|far-left]] of the [[political spectrum]],{{sfnm|1a1=Brooks|1y=1994|1p=xi|2a1=Kahn|2y=2000|3a1=Moynihan|3y=2007}} and much of its [[Anarchist economics|economics]] and [[Anarchist law|legal philosophy]] reflect [[Libertarian socialism|anti-authoritarian interpretations]] of [[Anarcho-communism|communism]], [[Collectivist anarchism|collectivism]], [[Anarcho-syndicalism|syndicalism]], [[Mutualism (economic theory)|mutualism]], or [[participatory economics]].{{sfn|Guerin|1970|p=35|loc=Critique of authoritarian socialism}} As anarchism does not offer a fixed body of doctrine from a single particular worldview,{{sfn|Marshall|1993|pp=14–17}} many [[History of anarchism|anarchist types and traditions]] exist and varieties of anarchy diverge widely.{{sfn|Sylvan|2007|p=262}} [[Anarchist schools of thought]] can differ fundamentally, supporting anything from extreme [[individualism]] to complete [[collectivism]].{{sfn|McLean|McMillan|2003|loc=Anarchism}} Strains of anarchism have often been divided into the categories of [[Social anarchism|social]] and [[individualist anarchism]], or similar dual classifications.{{sfnm|1a1=Fowler|1y=1972|2a1=Kropotkin|2y=2002|2p=5|3a1=Ostergaard|3y=2009|3p=14|3loc=Anarchism}}
+</p>
+ <p>
+ <pno> 2-3 </pno>
+== Etymology, terminology and definition ==
+{{see also|Anarchist terminology}}
+The etymological origin of the word anarchism is from the ancient Greek word ''anarkhia'',  meaning &quot;without a ruler&quot;, composed of the prefix ''a-'' (i.e. &quot;without&quot;) and the word ''arkhos'' (i.e. &quot;leader&quot; or &quot;ruler&quot;). The suffix [[-ism]] denotes the ideological current that favours anarchy.{{sfnm|1a1=Bates|1y=2017|1p=128|2a1=Long|2y=2013|2p=217}} The word anarchism appears in English from 1642{{sfn|Definition of Anarchism by Merriam-Webster|2019}} as ''anarchisme''&lt;ref&gt;{{cite OED|anarchism}}&lt;/ref&gt; and the word ''anarchy'' from 1539.&lt;ref&gt;{{cite OED|anarchy}}&lt;/ref&gt; Various factions within the [[French Revolution]] labelled their opponents as anarchists, although few such accused shared many views with later anarchists. Many revolutionaries of the 19th century such as [[William Godwin]] (1756–1836) and [[Wilhelm Weitling]] (1808–1871) would contribute to the anarchist doctrines of the next generation, but they did not use the word anarchist or anarchism in describing themselves or their beliefs.{{sfn|Joll|1964|pp=27–37}}
+</p>
+ <p>
+ <pno> 2-4 </pno>
+The first political philosopher to call himself an anarchist ({{lang-fr|anarchiste}}) was [[Pierre-Joseph Proudhon]] (1809–1865), marking the formal birth of anarchism in the mid-19th century. Since the 1890s and beginning in France,{{sfn|Nettlau|1996|p=162}} the term [[libertarianism]] has often been used as a synonym for anarchism{{sfn|Guerin|1970|loc=The Basic Ideas of Anarchism}} and its use as a synonym is still common outside the United States.{{sfnm|1a1=Ward|1y=2004|1p=62|2a1= Goodway|2y=2006|2p=4|3a1=Skirda|3y=2002|3p=183|4a1=Fernández|4y=2009|4p=9}} On the other hand, some use libertarianism to refer to [[Individualist anarchism|individualistic free-market philosophy]] only, referring to [[free-market anarchism]] as libertarian anarchism.{{sfn|Morris|2002|p=61}}
+</p>
+ <p>
+ <pno> 2-5 </pno>
+While [[Anti-statism|opposition to the state]] is central to anarchist thought, defining anarchism is not an easy task as there is a lot of talk among scholars and anarchists on the matter and various currents perceive anarchism slightly differently.{{sfn|Long|2013|p= 217}} Hence, it might be true to say that anarchism is a cluster of political philosophies opposing [[authority]] and [[hierarchical organization]] (including the [[State (polity)|state]], [[Anarchism and capitalism| capitalism]], [[Anarchism and nationalism| nationalism]] and all associated [[institution]]s) in the conduct of all [[human relations]] in favour of a society based on [[voluntary association]], on [[freedom]] and on [[decentralisation]], but this definition has the same shortcomings as the definition based on etymology (which is simply a negation of a ruler), or based on anti-statism (anarchism is much more than that) or even the anti-authoritarian (which is an ''a posteriori'' conclusion).{{sfnm|1a1=McLaughlin|1y=2007|1pp=25–29|2a1=Long|2y=2013|2pp=217}}
+</p>
+ <p>
+ <pno> 2-6 </pno>
+Nonetheless, major elements of the definition of anarchism include the following:{{sfn|McLaughlin|2007|pp=25–26}}
+# The will for a non-coercive society.
+# The rejection of the state apparatus.
+# The belief that human nature allows humans to exist in or progress toward such a non-coercive society.
+# A suggestion on how to act to pursue the ideal of [[anarchy]].
+</p>
+ <p>
+ <pno> 2-7 </pno>
+== History ==
+{{main|History of anarchism}}
+</p>
+ <p>
+ <pno> 2-8 </pno>
+=== Prehistoric and ancient world ===
+[[File:Paolo Monti - Servizio fotografico (Napoli, 1969) - BEIC 6353768.jpg|thumb|140px|[[Zeno of Citium]] (c. 334 – c. 262 BC), whose ''[[Republic (Zeno)|Republic]]'' inspired [[Peter Kropotkin]]{{sfn|Marshall|1993|p=70}}]]
+During the prehistoric era of mankind, an established authority did not exist. It was after the creation of towns and cities that hierarchy was invented and anarchistic ideas espoused as a reaction.{{sfn|Graham|2005|pp=xi–xiv}} Most notable examples of anarchism in the ancient world were in [[History of China|China]] and [[Ancient Greece|Greece]]. In China, [[philosophical anarchism]], meaning peaceful delegitimizing of the state, was delineated by [[Taoism|Taoist philosophers]] (i.e. [[Zhuang Zhou|Zhuangzi]] and [[Lao Tzu]]).{{sfnm|1a1=Coutinho|1y=2016|2a1=Marshall|2y=1993|2p=54}} Likewise in Greece, anarchist attitudes were articulated by tragedians and philosophers. [[Aeschylus]] and [[Sophocles]] used the myth of [[Antigone]] to illustrate the conflict between rules set by the state and [[autonomy|personal autonomy]]. Socrates questioned Athenian authorities constantly and insisted to the right of individual freedom of consciousness. [[Cynicism (philosophy)|Cynics]] dismissed human law (''Nomos'') and associated authorities while trying to live according to nature (''physis''). [[Stoics]] were supportive of a society based on unofficial and friendly relations among its citizens without the presence of a state.{{sfn|Marshall|1993|pp=4, 66–73}}
+</p>
+ <p>
+ <pno> 2-9 </pno>
+During the [[Middle Ages]], there was no anarchistic activity except some ascetic religious movements in the Islamic world or in Christian Europe. This kind of tradition later gave birth to [[religious anarchism]]. In Persia, a [[Zoroastrianism|Zoroastrian Prophet]] known as [[Mazdak]] was calling for an [[Egalitarianism|egalitarian society]] and the [[abolition of monarchy]], but he soon found himself executed by the king.{{sfn|Marshall|1993|p=86}} In [[Basra]], religious sects preached against the state. In Europe, various sects developed anti-state and libertarian tendencies. Those currents were the precursor of religious anarchism in the centuries to come. It was in the [[Renaissance]] and with the spread of [[Rationalism|reasoning]] and [[humanism]] through Europe that libertarian ideas emerged. Writers were outlining in their novels ideal societies that were based not on coercion but voluntarism. The [[Age of Enlightenment|Enlightenment]] further pushed towards anarchism with the optimism for social progress.{{citation needed|date=July 2019}}
+</p>
+ <p>
+ <pno> 2-10 </pno>
+=== Modern era ===
+The turning point towards anarchism was the [[French Revolution]] in which the anti-state and federalist sentiments began to take a form, mostly by [[Enragés]] and ''[[sans-culottes]]''.{{sfn|Marshall|1993|p=4}} Some prominent figures of anarchism begun developing the first anarchist currents.{{sfn|Marshall|1993|pp=4–5}} That is the era of classical anarchism that lasted until the end of the Spanish Civil War of 1936 and was the golden age of anarchism. [[William Godwin]] espoused [[philosophical anarchism]] in England morally delegitimizing the state, [[Max Stirner]]'s thinking paved the way to individualism and [[Pierre-Joseph Proudhon]]'s theory of [[Mutualism (economic theory)|mutualism]] found fertile soil in France.{{sfn|Marshall|1993|pp=4–5}}
+</p>
+ <p>
+ <pno> 2-11 </pno>
+[[File:Bakunin.png|thumb|upright|Anarchist [[Mikhail Bakunin]] opposed the [[Marxism|Marxist]] aim of [[dictatorship of the proletariat]] in favour of universal rebellion and allied himself with the federalists in the [[International Workingmen's Association|First International]] before his expulsion by the Marxists]]
+[[Mikhail Bakunin]] took mutualism and extended it to [[collectivist anarchism]]. Bakunin's current ([[Jura Federation]]) entered the class worker union called the [[International Workingmen's Association]] (IWA), later known as the First International, formed in 1864 to unite diverse revolutionary currents. Due to its links to active workers' movements, the International became a significant organisation. [[Karl Marx]] became a leading figure in the International and a member of its General Council. Proudhon's followers, the [[Mutualism (economic theory)|mutualists]], opposed Marx's [[state socialism]], advocating political [[abstentionism]] and small property holdings.{{sfnm|1a1=Dodson|1y=2002|1p=312|2a1=Thomas|2y=1985|2p=187|3a1=Chaliand|3a2=Blin|3y=2007|3p=116}} Bakunin's followers entered a bitter dispute with Marx which ended in 1872 with the split of the workers movement that officially took place in [[Hague Congress (1872)|Hague]].{{sfnm|1a1=Graham|1y=2019|1pp=334–336|2a1=Marshall|2y=1993|2p=24}} The major reason lay in fundamentally different approaches on how the workers would emancipate themselves. Marx was advocating for the creation of a political party to take part in electoral struggles whereas Bakunin thought that the whole set of Marx's thinking was very authoritarian.{{sfn|Marshall|1993|pp=24–25}} Bakunin is famous for predicting that if such a party would gain power by Marxist's terms, it would end up to be the new tyrant of workers. After being expelled from the IWA, anarchists formed the [[Anarchist St. Imier International|St. Imier International]]. Under the influence of [[Peter Kropotkin]], a Russian philosopher and scientist, [[anarcho-communism]] overlapped with collectivism.{{sfn|Marshall|1993|p=5}} Anarcho-communists, who drew inspiration from the 1871 [[Paris Commune]], advocated for free federation and distribution of goods according to one needs.{{sfn|Graham|2005|p=xii}} The major argument of anarcho-communism was that Bakunian perspective would lead to antagonism among collectives.{{citation needed|date=July 2019}}
+</p>
+ <p>
+ <pno> 2-12 </pno>
+At the turning of the century, anarchism had spread all over the world.{{sfn|Moya|2015|p=327}} In China, small groups of students imported the humanistic pro-science version of anarcho-communism.{{sfn|Marshall|1993|pp=519–521}} Tokyo was a hotspot for rebellious youth from countries of the far east, pouring into Japanese capital to study.{{sfnm|1a1=Dirlik|1y=1991|1p=133|2a1=Ramnath|2y=2019|2pp=681–682}} In [[Latin America]], [[Anarchism in Argentina|São Paulo]] was a stronghold and anarcho-syndicalism was the most prominent left-wing ideology.{{sfnm|1a1=Levy|1y=2011|1p=23|2a1=Laursen|2y=2019|2p=157|3a1=Marshall|3y=1993|3pp=504–508}} During that time, a minority of anarchists embarked into utilizing of violence in order to achieve their political ends. This kind of strategy is called [[propaganda of the deed]].{{sfn|Marshall|1993|pp=633–636}} The dismemberment of the French socialist movement into many groups and the execution and exile of many [[Communards]] to penal colonies following the suppression of the Paris Commune favoured individualist political expression and acts.{{sfn|Anderson|2004}} Even though many anarchists distanced themselves from these terrorist acts, anarchists were persecuted and given bad fame.{{sfn|Marshall|1993|pp=633–636}} [[Illegalism]], stealing the possessions of the rich because capitalists were not their rightful owners, was another strategy which some anarchists adopted during those same years.{{sfn|Bantman|2019|p=374}}
+</p>
+ <p>
+ <pno> 2-13 </pno>
+[[File:Makhno group.jpg|thumb|left|[[Nestor Makhno]] with members of the anarchist [[Revolutionary Insurrectionary Army of Ukraine]]]]
+Anarchists enthusiastically participated in the [[Russian Revolution]]. During the revolution, anarchists had concerns, but they opted to support the revolution instead of the [[White movement|Whites]]. However, they met harsh suppression after the [[Bolshevik government]] was stabilized. Anarchists in central Russia were either imprisoned, driven underground or joined the victorious [[Bolsheviks]]. Anarchists from Petrograd and Moscow instead fled to Ukraine.{{sfn|Avrich|2006|p=204}} The [[Kronstadt rebellion]] and [[Nestor Makhno]]'s struggle in the [[Free Territory]] were the most notable examples. With the anarchists being crashed in Russia, two new antithetical currents emerged, namely [[platformism]] and [[synthesis anarchism]]. Platformists sought to create a coherent group that would push for the revolution while the latter were against anything that would resemble a political party. The victory of the Bolsheviks in the [[October Revolution]] and the resulting [[Russian Civil War]] did serious damage to anarchist movements internationally. Many workers and activists saw the Bolshevik success as setting an example and [[Communist party|communist parties]] grew at the expense of anarchism and other socialist movements. In France and the United States, members of the major syndicalist movements of the [[General Confederation of Labour (France)|General Confederation of Labour]] and [[Industrial Workers of the World]] (IWW) left the organisations and joined the [[Communist International]].{{sfn|Nomad|1966|p=88}}
+</p>
+ <p>
+ <pno> 2-14 </pno>
+In the [[Spanish Civil War]], anarchists and syndicalists ([[Confederación Nacional del Trabajo|CNT]] and [[Federación Anarquista Ibérica|FAI]]) once again allied themselves with various currents of leftists. Spain had a long [[Anarchism in Spain|anarchist tradition]] and anarchists played an important role in the war. In response to the army rebellion, an anarchist-inspired movement of peasants and workers, supported by armed militias, took control of [[Barcelona]] and of large areas of rural Spain where they [[Collective farming|collectivised]] the land.{{sfn|Bolloten|1984|p=1107}} The Soviet Union provided some limited assistance at the beginning of the war, but the result was a bitter fight among communists and anarchists at a series of events named [[May Days]] as [[Joseph Stalin]] tried to seize control of the [[Republican faction (Spanish Civil War)|Republicans]].{{sfn|Marshall|1993|pp=xi, 466}}
+</p>
+ <p>
+ <pno> 2-15 </pno>
+=== Post-World War II era ===
+[[File:Rojava Sewing Cooperative.jpg|thumb|[[Rojava]] is supporting efforts for workers to form cooperatives, such as this sewing cooperative]]
+In the first years after World War II, the anarchist movement was severely damaged.{{sfn|Marshall|1993|p=xi}} However, the 1960s witnessed a revival of anarchism. The main causes of such a revival may have been the perceived failure of [[Marxism–Leninism]] and the tension build by the [[Cold War]].{{sfn|Marshall|1993|p=539}} During this era, anarchism was mostly part of other movements critical to both the state and capitalism such as the [[Anti-nuclear movement|anti-nuclear]], [[Environmental movement|environmental]] and [[Peace movement|pacifist movements]], the [[New Left]], or the [[counterculture of the 1960s]].{{sfn|Marshall|1993|pp=xi &amp; 539}} Anarchism was also associated with the [[punk rock]] movement as exemplified by bands such as [[Crass]] and the [[Sex Pistols]].{{sfn|Marshall|1993|pp=493–494}} Although [[feminist]] tendencies have always been a part of the anarchist movement in the form of [[anarcha-feminism]], they returned with vigour during the [[second wave of feminism]] in the 1960s.{{sfn|Marshall|1993|pp=556–557}}
+</p>
+ <p>
+ <pno> 2-16 </pno>
+Around the turn of the 21st century, anarchism grew in popularity and influence as part of the [[anti-war]], [[anti-capitalist]] and [[anti-globalisation movement]]s.{{sfn|Rupert|2006|p=66}} Anarchists became known for their involvement in protests against the meetings of the [[World Trade Organization]] (WTO), [[Group of Eight]] (G8) and the [[World Economic Forum]] (WEF). Some anarchist factions at these protests engaged in [[riot]]ing, [[property destruction]] and violent confrontations with the [[police]]. These actions were precipitated by ''ad hoc'', leaderless, anonymous cadres known as [[black bloc]]s—other organisational tactics pioneered in this time include [[security culture]], [[affinity group]]s and the use of decentralised technologies such as the internet. A significant event of this period was the confrontations at the [[1999 Seattle WTO protests|WTO conference in Seattle in 1999]].{{sfn|Rupert|2006|p=66}} Anarchist ideas have been influential in the development of the [[Zapatista Army of National Liberation|Zapatistas]] in Chiapas, Mexico, and the Democratic Federation of Northern Syria, more commonly known as [[Rojava]], a ''de facto'' [[Permanent autonomous zone|autonomous region]] in northern [[Syria]].{{sfn|Ramnath|2019|p=691}}
+</p>
+ <p>
+ <pno> 2-17 </pno>
+== Anarchist schools of thought ==
+{{main|Anarchist schools of thought}}
+{{libertarianism sidebar}}
+[[Anarchist schools of thought]] had been generally grouped in two main historical traditions ([[individualist anarchism]] and [[social anarchism]]) which have some different origins, values and evolution.{{sfnm|1a1=McLean|1a2=McMillan|1y=2003|1loc= Anarchism|2a1=Ostergaard|2y=2003|2p=14|2loc= Anarchism}} The individualist wing of anarchism emphasises [[negative liberty]] (opposition to state or [[social control]] over the individual) while those in the social wing emphasise [[positive liberty]] to achieve one's potential and argue that humans have needs that society ought to fulfil, &quot;recognising equality of entitlement&quot;.{{sfn|Harrison|Boyd|2003|p=251}} In a chronological and theoretical sense, there are classical—those created throughout the 19th century—and post-classical anarchist schools—those created since the mid-20th century and after.
+</p>
+ <p>
+ <pno> 2-18 </pno>
+Beyond the specific factions of anarchist thought is [[philosophical anarchism]] which the theoretical stance that the state lacks moral legitimacy without accepting the imperative of revolution to eliminate it. A component especially of individualist anarchism,{{sfnm|1a1=Ostergaard|1y=2006|1p=12|2a1=Gabardi|2y=1986|2pp=300–302}} philosophical anarchism may accept the existence of a [[Minarchism|minimal state]] as unfortunate and usually temporary, necessary evil, but argue that citizens do not have a [[moral obligation]] to obey the state when its laws conflict with individual autonomy.{{sfn|Klosko|2005|p=4}} One reaction against sectarianism within the anarchist milieu was [[anarchism without adjectives]], a call for [[toleration]] first adopted by [[Fernando Tarrida del Mármol]] in 1889 in response to the bitter debates of anarchist theory at the time.{{sfn|Avrich|1996|p=6}} In abandoning the hyphenated anarchisms (i.e. collectivist-, communist-, mutualist- and individualist-anarchism), it sought to emphasise the [[anti-authoritarian]] beliefs common to all anarchist schools of thought.{{sfn|Esenwein|1989|p=135}} The various anarchist schools of thought or currents are not distinct entities, but intermingle with each other.{{sfn|Marshall|1993|pp=1–6}}
+</p>
+ <p>
+ <pno> 2-19 </pno>
+=== Classical ===
+[[File:Portrait of Pierre Joseph Proudhon 1865.jpg|thumb|upright|[[Pierre-Joseph Proudhon]] was the primary proponent of [[Mutualism (economic theory)|anarcho-mutualism]] and influenced many future [[Individualist anarchism|individualist anarchist]] and [[Social anarchism|social anarchist]] thinkers]]
+[[Collectivist anarchism|Collectivist]] and [[Anarcho-communism|communist]] anarchism and [[anarcho-syndicalism]] are all considered to be forms of [[social anarchism]]. [[Mutualism (economic theory)|Mutualism]] and [[Individualist anarchism|individualism]] were the other notable anarchist currents through the 19th and early 20th century. Social anarchism rejects [[Private property#Criticism|private property]], seeing it as a source of social inequality (while retaining respect for [[personal property]]) and emphasises [[cooperation]] and [[Mutual aid (organization)|mutual aid]].{{sfn|Ostergaard|1991|p=21}}
+</p>
+ <p>
+ <pno> 2-20 </pno>
+==== Mutualism ====
+{{main|Mutualism (economic theory)}}
+[[Mutualism (economic theory)|Mutualism]] began in 18th-century English and French labour movements before taking an anarchist form associated with [[Pierre-Joseph Proudhon]] in France and others in the United States.{{sfn|Wilburn|2019|pp=213–218}} Proudhon proposed spontaneous order, whereby organisation emerges without central authority, a &quot;positive anarchy&quot; where order arises when everybody does &quot;what he wishes and only what he wishes&quot;{{sfn|Graham|2015|loc=Chapter One: Anarchism before the International}} and where &quot;business transactions alone produce the social order&quot;.{{sfnm|1a1=Copleston|1y=2003|1p=69|2a1=Supek|2y=1975|2p=94|2ps=: The exact quote of Proudhon is the following: &quot;The notion of anarchy in politics is just as rational and positive as any other. It means that once industrial functions have taken over from political functions, then business transactions alone produce the social order&quot; (1864).}}
+</p>
+ <p>
+ <pno> 2-21 </pno>
+Proudhon distinguished between ideal political possibilities and practical governance. For this reason, much in contrast to some of his theoretical statements concerning ultimate spontaneous self-governance, Proudhon was heavily involved in French parliamentary politics and allied himself with the socialist factions of the workers movement. During his life of public service, he began advocating state-protected [[charter]]s for worker-owned [[cooperative]]s and promoting certain [[nationalisation]] schemes.{{cn|date=March 2019}}
+</p>
+ <p>
+ <pno> 2-22 </pno>
+Mutualist anarchism is concerned with [[Reciprocity (cultural anthropology)|reciprocity]], [[Free association (Marxism and anarchism)|free association]], voluntary [[contract]], [[federation]] and [[Monetary reform|credit and currency reform]]. According to the American mutualist [[William Batchelder Greene]], each worker in the mutualist system would receive &quot;just and exact pay for his work; services equivalent in cost being exchangeable for services equivalent in cost, without profit or discount&quot;.{{sfn|Greene|1875}} Mutualism has been retrospectively characterised as ideologically situated between individualist and collectivist forms of anarchism.{{sfnm|1a1=Avrich|1y=1996|1p=6|2a1=Miller|2y=1991|2p=11}} Proudhon first characterised his goal as a &quot;third form of society, the synthesis of communism and property [which] we call LIBERTY&quot;.{{sfn|Pierson|2013|p=187|ps=: The quote is from Proudhon's ''[[What is Property?]]'' (1840).}}
+</p>
+ <p>
+ <pno> 2-23 </pno>
+==== Collectivist anarchism ====
+{{main|Collectivist anarchism}}
+[[Collectivist anarchism]], also known as anarchist collectivism or anarcho-collectivism and referred to as revolutionary socialism or a [[Revolutionary socialism|form of such]],{{sfnm|1a1=Morris|1y=1993|1p=76|2a1=Rae|2y=1901|2p=261}} is a revolutionary form of anarchism commonly associated with [[Mikhail Bakunin]] and [[Johann Most]].{{sfn|Avrich|2006|p=5}}
+</p>
+ <p>
+ <pno> 2-24 </pno>
+At the epicentre of collectivist anarchism lies the belief in the potential of humankind for goodness and solidarity which will flourish when oppressive governments are abolished.{{sfn|Heywood|2017|pp=146–147}} Collectivist anarchists oppose all private ownership of the means of production, instead advocating that ownership be collectivised. This was to be achieved through violent revolution, first starting with a small cohesive group through acts of violence, or propaganda by the deed, to inspire the workers as a whole to revolt and forcibly collectivise the means of production.{{sfn|Avrich|1996|pp=3–4}} However, collectivisation was not to be extended to the distribution of income as workers would be paid according to time worked, rather than receiving goods being distributed according to need as in anarcho-communism. This position was criticised by anarcho-communists as effectively &quot;uphold[ing] the wages system&quot;.{{sfn|Kropotkin|2007|loc=chapter 13}} Collectivist anarchism arose contemporaneously with [[Marxism]], but it opposed the Marxist [[dictatorship of the proletariat]] despite the stated Marxist goal of a collectivist [[stateless society]].{{sfnm|1a1=Heywood|1y=2017|1pp=146–147|2a1=Bakunin|2y=1990|2ps=: &quot;They [the Marxists] maintain that only a dictatorship—their dictatorship, of course—can create the will of the people, while our answer to this is: No dictatorship can have any other aim but that of self-perpetuation, and it can beget only slavery in the people tolerating it; freedom can be created only by freedom, that is, by a universal rebellion on the part of the people and free organization of the toiling masses from the bottom up&quot;.}}
+</p>
+ <p>
+ <pno> 2-25 </pno>
+Anarchist, communist and collectivist ideas are not [[mutually exclusive]]—although the collectivist anarchists advocated [[Labour voucher|compensation for labour]], some held out the possibility of a post-revolutionary transition to a communist system of distribution according to need.{{sfn|Guillaume|1972}}
+</p>
+ <p>
+ <pno> 2-26 </pno>
+==== Anarcho-communism ====
+{{main|Anarcho-communism}}
+{{anarcho-communism sidebar}}
+[[File:Kropotkin2.jpg|thumb|left|upright|[[Peter Kropotkin]] was influential in the development of [[anarcho-communism]]]]
+[[Anarcho-communism]], also known as [[anarchist-communism]], [[communist anarchism]] and [[libertarian communism]], is a theory of anarchism that advocates abolition of the [[State (polity)|state]], [[Market (economics)|markets]], [[money]], [[private property]] (while retaining respect for [[personal property]]){{sfn|Berkman|1929|ps=: Berkman explains: &quot;The revolution abolishes private ownership of the means of production and distribution, and with it goes capitalistic business. Personal possession remains only in the things you use. Thus, your watch is your own, but the watch factory belongs to the people&quot;.}} and [[capitalism]] in favour of [[common ownership]] of the [[means of production]],{{sfn|Mayne|1999|p=131}} [[direct democracy]] and a [[Horizontalidad|horizontal network]] of [[voluntary association]]s and [[workers' council]]s with production and consumption based on the guiding principle: &quot;[[From each according to his ability, to each according to his needs|From each according to his ability, to each according to his need]]&quot;.{{sfnm|1a1=Marshall|1y=1993|1p=327|2a1=Turcato|2y=2019|2pp=237–323}}
+</p>
+ <p>
+ <pno> 2-27 </pno>
+Anarcho-communism developed out of radical socialist currents after the [[French Revolution]],{{sfn|Graham|2005}} but it was first formulated as such in the Italian section of the [[First International]].{{sfn|Pernicone|2009|pp=111–113}} The theoretical work of [[Peter Kropotkin]] took importance later as it expanded and developed pro-organisationalist and insurrectionary anti-organisationalist sections.{{sfn|Pengam}}
+</p>
+ <p>
+ <pno> 2-28 </pno>
+To date, the best known examples of an anarcho-communist society (i.e. established around the ideas as they exist today and achieving worldwide attention and knowledge in the historical canon), are the anarchist territories during the [[Spanish Revolution of 1936|Spanish Revolution]]{{sfn|Bookchin|2009|loc=Chapter 1. An Overview of the Spanish Libertarian Movement}} and the [[Free Territory]] during the [[Russian Revolution]]. Through the efforts and influence of the [[Anarchism in Spain|Spanish anarchists]] during the Spanish Revolution within the [[Spanish Civil War]] starting in 1936, anarcho-communism existed in most of Aragon, parts of the Levante and Andalusia as well as in the stronghold of [[Revolutionary Catalonia|Catalonia]]. Along with the [[Republican faction (Spanish Civil War)|Republicans]], it was crushed by the combined forces of the [[Francisco Franco]]'s [[Nationalist faction (Spanish Civil War)|Nationalists]], [[Adolf Hitler]] and [[Benito Mussolini]] as well as repression by the [[Communist Party of Spain]] (backed by the [[Soviet Union]]) and economic and armaments blockades from the capitalist countries and the [[Second Spanish Republic|Spanish Republic]] itself.{{sfn|Bookchin|2009|ps=: Bookchin's quote: &quot;This process of education and class organization, more than any single factor in Spain, produced the collectives. And to the degree that the CNT-FAI (for the two organizations became fatally coupled after July 1936) exercised the major influence in an area, the collectives proved to be generally more durable, communist and resistant to Stalinist counterrevolution than other republican-held areas of Spain&quot;.}}
+</p>
+ <p>
+ <pno> 2-29 </pno>
+==== Anarcho-syndicalism ====
+{{main|Anarcho-syndicalism}}
+[[File:Manifestación CNT Bilbao.jpg|thumb|left|[[International Workers' Day|May Day]] 2010 demonstration of Spanish [[Anarcho-syndicalism|anarcho-syndicalist]] trade union [[Confederación Nacional del Trabajo|CNT]] in Bilbao, Basque Country]]
+{{anarcho-syndicalism sidebar}}
+[[Anarcho-syndicalism]], also referred to as revolutionary syndicalism, is a branch of anarchism that focuses on the [[labour movement]].{{sfn|Isaacs|Sparks|2004|p=248}}
+</p>
+</text>
+<sha1>42l0cvblwtb4nnupxm6wo000d27t6kf</sha1>
+</revision>
+</page>
+</doc>
+
