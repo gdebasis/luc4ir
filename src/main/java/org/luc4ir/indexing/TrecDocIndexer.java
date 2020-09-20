@@ -205,20 +205,26 @@ public class TrecDocIndexer {
         StringBuffer contentBuff = new StringBuffer();
         String line;
         boolean startAccumulating = false;
+        int docCount = 0;
         
         BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
         
         while ((line = br.readLine())!= null) {
             line = line.trim();
+            
             if (line.startsWith("<pno>")) {
                 id = line.split("\\s+")[1];
                 startAccumulating = true;
+                docCount++;
             }
             else if (line.equals("</p>")) {
                 doc = constructDoc(id, contentBuff.toString());
                 writer.addDocument(doc);
                 contentBuff.setLength(0); // clear buffer
                 startAccumulating = false;
+                
+                if (docCount % 10000 == 0)
+                    System.out.println(String.format("Indexed %d passages from Wiki", docCount));
             }
             else if (startAccumulating) {
                 line = removeTags(line);

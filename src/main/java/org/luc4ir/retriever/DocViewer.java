@@ -29,21 +29,28 @@ import org.luc4ir.indexing.TrecDocIndexer;
 public class DocViewer {
     IndexReader reader;
     IndexSearcher searcher;
+    String idFieldName, contentFieldName;
     
-    public DocViewer(String indexDirPath) throws IOException {
+    public DocViewer(String indexDirPath, String docFieldName, String contentFieldName) throws IOException {
         File indexDir = new File(indexDirPath);        
         reader = DirectoryReader.open(FSDirectory.open(indexDir.toPath()));
         searcher = new IndexSearcher(reader);
+        this.idFieldName = docFieldName;
+        this.contentFieldName = contentFieldName;
+    }
+    
+    public DocViewer(String indexDirPath) throws IOException {
+        this(indexDirPath, TrecDocIndexer.FIELD_ID, TrecDocIndexer.FIELD_ANALYZED_CONTENT);
     }
 
     public String getDocText(String docId) throws Exception {
-        TermQuery tq = new TermQuery(new Term(TrecDocIndexer.FIELD_ID, docId.trim()));
+        TermQuery tq = new TermQuery(new Term(idFieldName, docId.trim()));
         TopDocs topDocs = searcher.search(tq, 1);
         if (topDocs.scoreDocs.length <= 0)
             return null;
-                    
+        
         Document d = reader.document(topDocs.scoreDocs[0].doc);
-        return d.get(TrecDocIndexer.FIELD_ANALYZED_CONTENT);
+        return d.get(contentFieldName).replace("\n", " ").replace("\r", " ");
     }
     
     void close() throws Exception {
@@ -52,19 +59,20 @@ public class DocViewer {
     
     public static void main(String[] args) {
         // Read a file of <qids> <docids> (useful for a pool) and display the text
-        if (args.length < 2) {
-            System.err.println("usage: java DocViewer <two column id file - first vol - qid, sedond docid> <indexdir>");
+        if (args.length < 4) {
+            System.err.println("usage: java DocViewer <two column id file - first vol - qid, sedond docid> <indexdir> <id-field name> <content field name>");
             System.err.println("Evaluating on sample TREC docids");            
             
             // else demo on the sample provide...
             args = new String[2];
             args[0] = "sample.res";
-            args[1] = "index_trecd45";  // ths would only be present after u run the index
+            args[1] = "index_trecd45";  // this would only be present after u run the index
         }
         
         try {
             List<String> lines = FileUtils.readLines(new File(args[0]), Charsets.UTF_8);
-            DocViewer dv = new DocViewer(args[1]);
+            DocViewer dv = args.length>2? new DocViewer(args[1], args[2], args[3]): new DocViewer(args[1]);
+            
             for (String line: lines) {
                 String[] tokens = line.split("\\s+");
                 String text = dv.getDocText(tokens[1]);

@@ -10,6 +10,18 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+<repositories>
+    <repository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url> <!-- the https you've been looking for -->
+      <layout>default</layout>
+      <snapshots>
+        <enabled>false</enabled> <!-- or set to true if desired, default is false -->
+      </snapshots>
+    </repository>
+  </repositories>
+      
 <dependencies>
 <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-core -->
 <dependency>
@@ -27,6 +39,12 @@
 <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-queryparser</artifactId>
+    <version>5.1.0</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-backward-codecs -->
+<dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-backward-codecs</artifactId>
     <version>5.1.0</version>
 </dependency>
 <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-queries -->
@@ -114,6 +132,15 @@
             </goals>
             <configuration>
                 <mainClass>org.luc4ir.evaluator.RCDEvaluator</mainClass>
+            </configuration>
+        </execution>        
+        <execution>
+            <id>index2tsv</id>
+            <goals>
+                <goal>java</goal>
+            </goals>
+            <configuration>
+                <mainClass>org.luc4ir.retriever.IndexToTsvConverter</mainClass>
             </configuration>
         </execution>        
         </executions>       
