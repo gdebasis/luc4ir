@@ -1,6 +1,13 @@
 #!/bin/bash
 
-RESDIR=task1_sample/
+if [ $# -lt 1 ]
+then
+	echo "usage: $0 <folder containing task1 runs>"
+    exit
+fi
+
+
+RESDIR=$1
 RELFILE=task1_test.rel
 EQUIV_QRIES=rcd/equiv.txt
 
