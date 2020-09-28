@@ -6,6 +6,7 @@ then
     exit
 fi
 
+#grep "<title>" ~/research/fire2020/rcd/eval/topics_trec_formatted.txt | sed 's/<title>//'|sed 's/<\/title>//'| awk '{print NR"\t"tolower($0)}' | sed 's/\.//g' | sed 's/\!//g'
 
 RESDIR=$1
 RELFILE=task1_test.rel
