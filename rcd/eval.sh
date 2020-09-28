@@ -1,15 +1,15 @@
 #!/bin/bash
 
-if [ $# -lt 1 ]
+if [ $# -lt 2 ]
 then
-	echo "usage: $0 <folder containing task1 runs>"
+	echo "usage: $0 <folder containing task1 runs> <rel file (correct one for train or test)>"
     exit
 fi
 
 #grep "<title>" ~/research/fire2020/rcd/eval/topics_trec_formatted.txt | sed 's/<title>//'|sed 's/<\/title>//'| awk '{print NR"\t"tolower($0)}' | sed 's/\.//g' | sed 's/\!//g'
 
 RESDIR=$1
-RELFILE=task1_test.rel
+RELFILE=$2
 EQUIV_QRIES=rcd/equiv.txt
 
 for RESFILE in `find $RESDIR -type f`
