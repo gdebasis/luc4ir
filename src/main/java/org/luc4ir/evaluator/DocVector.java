@@ -8,9 +8,12 @@ package org.luc4ir.evaluator;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
 /**
@@ -49,7 +52,13 @@ public class DocVector {
 
     public DocVector(String text, int ngramSize) {
         this.text = text;
-        String[] retrievedTerms = analyze(new NGramAnalyzer(ngramSize), text);            
+        String[] retrievedTerms;
+        
+        if (ngramSize == 0)
+            retrievedTerms = analyze(new StandardAnalyzer(), text);
+        else
+            retrievedTerms = analyze(new NGramAnalyzer(ngramSize), text);
+        
         init(retrievedTerms);
     }
     
@@ -63,7 +72,7 @@ public class DocVector {
      * @param text A piece of text
      * @return An array of tokens (String objects)
      */
-    public String[] analyze(Analyzer analyzer, String text) {
+    public final String[] analyze(Analyzer analyzer, String text) {
         
         List<String> buff = new ArrayList<>();
         try {
@@ -131,6 +140,21 @@ public class DocVector {
             sim += tf.freq * that_tf.freq;
         }
         return dLen==0 || qLen==0? 0 : sim/(dLen*qLen);
+    }
+
+    /**
+     * Computes similarity with another 'Document' object.
+     * @param that
+     * @return 
+     */
+    public float jaccard(DocVector that) {
+        Set<String> vocab = new HashSet(this.tfMap.keySet());
+        vocab.addAll(that.tfMap.keySet()); // vocab is now the union
+        
+        Set <String> common = new HashSet(this.tfMap.keySet());        
+        common.retainAll(that.tfMap.keySet());
+        
+        return common.size()/(float)vocab.size();
     }
     
     /**

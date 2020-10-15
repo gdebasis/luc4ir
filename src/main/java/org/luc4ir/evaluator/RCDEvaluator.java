@@ -9,6 +9,7 @@ import java.util.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.james.mime4j.Charsets;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.luc4ir.indexing.TrecDocIndexer;
 
 /**
@@ -22,15 +23,15 @@ class PredRelPair {
 
     public PredRelPair(String id, String pred, String rel) {
         this.id = id;
-        this.pred = TrecDocIndexer.analyze(new EnglishAnalyzer(), pred);
-        this.rel = TrecDocIndexer.analyze(new EnglishAnalyzer(), rel);
+        this.pred = TrecDocIndexer.analyze(new StandardAnalyzer(), pred);
+        this.rel = TrecDocIndexer.analyze(new StandardAnalyzer(), rel);
     }
     
-    public float getSim() {
-        DocVector predvec = new DocVector(pred, RCDEvaluator.N);
-        DocVector refvec = new DocVector(rel, RCDEvaluator.N);
+    public float getSim(int ngramSize) {
+        DocVector predvec = new DocVector(pred, ngramSize);
+        DocVector refvec = new DocVector(rel, ngramSize);
         
-        return predvec.cosineSim(refvec);
+        return ngramSize>0? predvec.cosineSim(refvec): predvec.jaccard(refvec);
     }
     
     @Override
@@ -45,7 +46,7 @@ public class RCDEvaluator {
     Map<String, List<String>> equivQueries;
     Map<String, PredRelPair> predRelPairs;
     
-    static public int N = 5;
+    //static public int N = 5;
 
     RCDEvaluator(String predRelTsv, String equivFile) throws Exception {
         loadEquivQueries(equivFile);
@@ -87,8 +88,6 @@ public class RCDEvaluator {
     }
     
     float printAvgNGramMatchStats(int ngramValue) {
-        N = ngramValue;
-        
         float avg = 0;
         int numEvaluated = 0;
         boolean evaluate;
@@ -121,14 +120,14 @@ public class RCDEvaluator {
             
             PredRelPair tuple = new PredRelPair(id, predTextStr, relTextStr);
             
-            float sim = tuple.getSim();
+            float sim = tuple.getSim(ngramValue);
             System.out.println(tuple.toString() + "\t" + sim);
             avg += sim;
             numEvaluated++;
         }
         
         avg = avg/(float)numEvaluated;
-        System.out.println(String.format("Avg. %d-gram Cosine-Sim = %.4f", N, avg));
+        System.out.println(String.format("Avg. %d-gram Cosine-Sim = %.4f", ngramValue, avg));
         return avg;
     }
 
@@ -153,6 +152,8 @@ public class RCDEvaluator {
                 wavg += w*val;
             }
             System.out.println("BLEU = " + wavg);
+            
+            rcdeval.printAvgNGramMatchStats(0);
         }
         catch (Exception ex) {
             ex.printStackTrace();
