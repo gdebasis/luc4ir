@@ -18,7 +18,6 @@ import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.util.Version;
 import org.luc4ir.indexing.TrecDocIndexer;
 
 public class TRECQueryParser extends DefaultHandler {
@@ -29,7 +28,6 @@ public class TRECQueryParser extends DefaultHandler {
     StandardQueryParser queryParser;
     
     public List<TRECQuery>  queries;
-    final static String[] tags = {"id", "title", "desc", "narr"};
 
     public TRECQueryParser(String fileName, Analyzer analyzer) throws SAXException {
         this.fileName = fileName;
