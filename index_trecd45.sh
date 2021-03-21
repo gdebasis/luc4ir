@@ -15,7 +15,7 @@ coll=$COLL
 index=$INDEX
 stopfile=stop.txt
 #put 'generic' for sax parsing
-sax.parser=dom
+parser=dom
 EOF1
 
 mvn exec:java@index -Dexec.args="index.properties"
