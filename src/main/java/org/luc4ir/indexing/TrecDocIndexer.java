@@ -28,8 +28,8 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
+import org.apache.lucene.document.*;
+import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.FSDirectory;
@@ -168,16 +168,46 @@ public class TrecDocIndexer {
                 indexFile(f);
         }
     }
-    
+
+    static Field constructIDField(String id) {
+        FieldType fieldType = new FieldType();
+        fieldType.setIndexOptions(IndexOptions.DOCS);
+        fieldType.setStored(true);    // default = false (same as Field.Store.NO)
+        fieldType.setTokenized(false);  // default = true (tokenize the content)
+        fieldType.setOmitNorms(false); // default = false (used when scoring)
+        Field idField = new Field(FIELD_ID, id, fieldType);
+        return idField;
+    }
+
+    static Field constructContentField(String content) {
+        FieldType contentFieldType = new FieldType();
+        contentFieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS);
+        contentFieldType.setStored(true);    // default = false (same as Field.Store.NO)
+        contentFieldType.setTokenized(true);  // default = true (tokenize the content)
+        contentFieldType.setOmitNorms(false); // default = false (used when scoring)
+        contentFieldType.setStoreTermVectors(true);
+        Field contentField = new Field(FIELD_ANALYZED_CONTENT, content, contentFieldType);
+        return contentField;
+    }
+
     Document constructDoc(String id, String content) throws IOException {
+
+        Field idField = constructIDField(id);
+        Field contentField = constructContentField(content);
+
         Document doc = new Document();
+        doc.add(idField);
+        doc.add(contentField);
+
+        /* Lucene 5 code
         doc.add(new Field(FIELD_ID, id, Field.Store.YES, Field.Index.NOT_ANALYZED));
 
         // For the 1st pass, use a standard analyzer to write out
         // the words (also store the term vector)
         doc.add(new Field(FIELD_ANALYZED_CONTENT, content,
                 Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES));
-        
+        */
+
         return doc;
     }
 

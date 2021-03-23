@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package qsel;
+package org.luc4ir.qsel;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +18,7 @@ import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.xml.builders.BooleanQueryBuilder;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
@@ -85,12 +86,12 @@ public class QuerySelector {
         WindowScore bestWindow = windowScores.get(windowScores.size()-1);
         
         // construct the Query object from the best window
-        BooleanQuery selectedQuery = new BooleanQuery();
+        BooleanQuery.Builder selectedQueryBuilder = new BooleanQuery.Builder();
         for (String token: bestWindow.tokens) {
             TermQuery tq = new TermQuery(new Term(TrecDocIndexer.FIELD_ANALYZED_CONTENT, token));
-            selectedQuery.add(new BooleanClause(tq, BooleanClause.Occur.SHOULD));
+            selectedQueryBuilder.add(new BooleanClause(tq, BooleanClause.Occur.SHOULD));
         }
         
-        return (Query)selectedQuery;
+        return (Query)selectedQueryBuilder.build();
     }
 }

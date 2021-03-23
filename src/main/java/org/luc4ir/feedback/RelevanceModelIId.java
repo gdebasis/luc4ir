@@ -17,11 +17,7 @@ import java.util.Properties;
 import java.util.Set;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.*;
 import org.luc4ir.indexing.TrecDocIndexer;
 import org.luc4ir.trec.TRECQuery;
 import org.luc4ir.retriever.TrecDocRetriever;
@@ -99,7 +95,7 @@ public class RelevanceModelIId {
             RetrievedDocTermInfo w = e.getValue();
             p_w = mixTfIdf(w);
             
-            Set<Term> qTerms = this.trecQuery.getQueryTerms();
+            Set<Term> qTerms = this.trecQuery.getQueryTerms(retriever.getSearcher());
             for (Term qTerm : qTerms) {
                 
                 // Get query term frequency
@@ -144,7 +140,7 @@ public class RelevanceModelIId {
         // Sort the scoredocs in ascending order of the KL-Div scores
         Arrays.sort(klDivScoreDocs, new KLDivScoreComparator());
         
-        TopDocs rerankedDocs = new TopDocs(topDocs.totalHits, klDivScoreDocs, klDivScoreDocs[klDivScoreDocs.length-1].score);
+        TopDocs rerankedDocs = new TopDocs(topDocs.totalHits, klDivScoreDocs);
         return rerankedDocs;
     }
     
@@ -185,9 +181,10 @@ public class RelevanceModelIId {
         computeFdbkWeights();
         
         TRECQuery expandedQuery = new TRECQuery(this.trecQuery);
-        Set<Term> origTerms = new HashSet<Term>();
-        this.trecQuery.luceneQuery.extractTerms(origTerms);
-        expandedQuery.luceneQuery = new BooleanQuery();
+        Set<Term> origTerms = new HashSet<>();
+        this.trecQuery.luceneQuery
+            .createWeight(retriever.getSearcher(), ScoreMode.COMPLETE, 1)
+            .extractTerms(origTerms);
         HashMap<String, String> origQueryWordStrings = new HashMap<>();
         
         float normalizationFactor = 0;
@@ -210,15 +207,17 @@ public class RelevanceModelIId {
         }
         
         Collections.sort(termStats);
-        
+
+        BooleanQuery.Builder expandedQueryBuilder = new BooleanQuery.Builder();
         for (Term t : origTerms) {
             origQueryWordStrings.put(t.text(), t.text());
-            TermQuery tq = new TermQuery(t);
             //+++POST_SIGIR review: Assigned weights according to RLM post QE
             //tq.setBoost(1-fbweight);
-            tq.setBoost((1-fbweight)/(float)origTerms.size());
+            BoostQuery tq = new BoostQuery(
+                    new TermQuery(t),
+                    (1-fbweight)/(float)origTerms.size());
             //---POST_SIGIR review
-            ((BooleanQuery)expandedQuery.luceneQuery).add(tq, BooleanClause.Occur.SHOULD);
+            expandedQueryBuilder.add(tq, BooleanClause.Occur.SHOULD);
         }
         
         int nTermsAdded = 0;
@@ -226,12 +225,15 @@ public class RelevanceModelIId {
             String thisTerm = selTerm.getTerm();
             if (origQueryWordStrings.get(thisTerm) != null)
                 continue;
-            TermQuery tq = new TermQuery(new Term(TrecDocIndexer.FIELD_ANALYZED_CONTENT, thisTerm));
-            ((BooleanQuery)expandedQuery.luceneQuery).add(tq, BooleanClause.Occur.SHOULD);
+
+            BoostQuery tq = new BoostQuery(
+                new TermQuery(new Term(TrecDocIndexer.FIELD_ANALYZED_CONTENT, thisTerm)),
+                fbweight*selTerm.wt
+            );
+            expandedQueryBuilder.add(tq, BooleanClause.Occur.SHOULD);
             
             //+++POST_SIGIR review: Assigned weights according to RLM post QE
             //tq.setBoost(fbweight);
-            tq.setBoost(fbweight*selTerm.wt);
             //tq.setBoost(selTerm.wt);
             //---POST_SIGIR review
             
@@ -240,7 +242,7 @@ public class RelevanceModelIId {
                 break;
         }
         
-        return expandedQuery;
+        return new TRECQuery(expandedQueryBuilder.build());
     }
         
 }

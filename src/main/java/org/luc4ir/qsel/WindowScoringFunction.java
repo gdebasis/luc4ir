@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package qsel;
+package org.luc4ir.qsel;
 
 import java.io.IOException;
 import org.apache.lucene.analysis.Analyzer;

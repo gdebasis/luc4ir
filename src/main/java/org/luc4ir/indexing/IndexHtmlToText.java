@@ -40,9 +40,7 @@ public class IndexHtmlToText {
         TopDocs topDocs;
         
         Query query = new TermQuery(new Term(TrecDocIndexer.FIELD_ID, docId));
-        collector = TopScoreDocCollector.create(1);
-        searcher.search(query, collector);
-        topDocs = collector.topDocs();
+        topDocs = searcher.search(query, 1);
         ScoreDoc sd = topDocs.scoreDocs[0];
                 
         Document doc = reader.document(sd.doc);

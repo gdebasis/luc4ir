@@ -9,11 +9,7 @@ import java.io.IOException;
 import java.util.*;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.*;
 import org.apache.lucene.search.similarities.LMJelinekMercerSimilarity;
 import org.apache.lucene.search.similarities.Similarity;
 import org.luc4ir.trec.TRECQuery;
@@ -152,8 +148,8 @@ public class HyperbolicRetriever extends TrecDocRetriever {
     TopDocs retrieve(TRECQuery query) throws IOException {
         Query q = query.getLuceneQueryObj();
         Set<Term> qTerms = new HashSet<>();
-        q.extractTerms(qTerms);
-        
+        q.createWeight(this.searcher, ScoreMode.COMPLETE, 1).extractTerms(qTerms);
+
         // Accumulate the scores of a doc for each term 
         for (Term qTerm: qTerms) {
             computeTermOverlapWeights(qTerm);
@@ -164,7 +160,9 @@ public class HyperbolicRetriever extends TrecDocRetriever {
         for (int i=0; i < numWanted; i++)
             rerankedSD[i] = new ScoreDoc(docvecs[i].docId, docvecs[i].querySim);
         
-        TopDocs topdocs = new TopDocs(numWanted, rerankedSD, rerankedSD[0].score);
+        TopDocs topdocs = new TopDocs(
+                new TotalHits(numWanted, TotalHits.Relation.EQUAL_TO),
+                rerankedSD);
         return topdocs;
     }
 

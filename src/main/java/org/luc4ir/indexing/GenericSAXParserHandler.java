@@ -12,6 +12,8 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.FieldType;
+import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexWriter;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -49,8 +51,17 @@ class BasicDocUnit {
     
     Document constructDocument() {
         Document doc = new Document();
+
+        Field idField = TrecDocIndexer.constructIDField(id);
+        Field contentField = TrecDocIndexer.constructContentField(content);
+
+        doc.add(idField);
+        doc.add(contentField);
+
+        /* Lucene 5.1 code
         doc.add(new Field(FIELD_ID, id, Field.Store.YES, Field.Index.NOT_ANALYZED));
-        doc.add(new Field(FIELD_CONTENT, content, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES));        
+        doc.add(new Field(FIELD_CONTENT, content, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES));
+         */
         return doc;
     }
     

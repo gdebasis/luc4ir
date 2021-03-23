@@ -5,17 +5,15 @@
  */
 package org.luc4ir.retriever;
 
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.similarities.LMJelinekMercerSimilarity;
 import org.apache.lucene.search.similarities.Similarity;
 import org.luc4ir.trec.TRECQuery;
 import org.luc4ir.trec.TRECQueryParser;
-import qsel.IdfWindowScoringFunction;
-import qsel.QuerySelector;
-import qsel.WindowScoringFunction;
+import org.luc4ir.qsel.IdfWindowScoringFunction;
+import org.luc4ir.qsel.QuerySelector;
+import org.luc4ir.qsel.WindowScoringFunction;
 
 /**
  *

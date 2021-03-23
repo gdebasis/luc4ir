@@ -69,6 +69,7 @@ public class TrecDocRetriever {
     
     public Properties getProperties() { return prop; }
     public IndexReader getReader() { return reader; }
+    public IndexSearcher getSearcher() { return searcher; }
     
     public List<TRECQuery> constructQueries() throws Exception {        
         String queryFile = prop.getProperty("query.file");
@@ -216,10 +217,7 @@ public class TrecDocRetriever {
         System.out.println("Expanded qry: " + expandedQuery.getLuceneQueryObj());
         
         // Reretrieve with expanded query
-        TopScoreDocCollector collector = TopScoreDocCollector.create(numWanted);
-        searcher.search(expandedQuery.getLuceneQueryObj(), collector);
-        topDocs = collector.topDocs();
-        
+        topDocs = searcher.search(expandedQuery.getLuceneQueryObj(), numWanted);
         return topDocs;
     }
     
