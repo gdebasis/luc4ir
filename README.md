@@ -1,4 +1,4 @@
-# Mavenized Lucene IR Framework for TREC Ad-hoc Document Retrieval
+# Luc4IR
 
 This code is distributed in the hope that it'll be useful for IR practitioners and students who want to get started with retrieving documents from a collection and measure effectiveness with standard evaluation metrics.
 
