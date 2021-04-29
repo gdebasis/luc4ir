@@ -23,7 +23,7 @@ import java.util.TreeMap;
 
 class PerQueryRelDocs {
     String qid;
-    HashMap<String, Integer> relMap; // keyed by docid, entry stores the rel value
+    HashMap<String, Float> relMap; // keyed by docid, entry stores the rel value (>0)
     int numRel;
     
     public PerQueryRelDocs(String qid) {
@@ -32,7 +32,7 @@ class PerQueryRelDocs {
         relMap = new HashMap<>();
     }
     
-    void addTuple(String docId, int rel) {
+    void addTuple(String docId, float rel) {
         if (relMap.get(docId) != null)
             return;
         if (rel > 0) {
@@ -92,9 +92,9 @@ class AllRelRcds {
         for (Map.Entry<String, PerQueryRelDocs> e : perQueryRels.entrySet()) {
             PerQueryRelDocs perQryRelDocs = e.getValue();
             buff.append(e.getKey()).append("\n");
-            for (Map.Entry<String, Integer> rel : perQryRelDocs.relMap.entrySet()) {
+            for (Map.Entry<String, Float> rel : perQryRelDocs.relMap.entrySet()) {
                 String docName = rel.getKey();
-                int relVal = rel.getValue();
+                float relVal = rel.getValue();
                 buff.append(docName).append(",").append(relVal).append("\t");
             }
             buff.append("\n");
@@ -110,11 +110,17 @@ class AllRelRcds {
 class ResultTuple implements Comparable<ResultTuple> {
     String docName; // doc name
     int rank;       // rank of retrieved document
-    int rel;    // is this relevant? comes from qrel-info
+    float rel;    // is this relevant? comes from qrel-info
 
     public ResultTuple(String docName, int rank) {
         this.docName = docName;
         this.rank = rank;
+    }
+
+    public ResultTuple(String docName, int rank, float rel) {
+        this.docName = docName;
+        this.rank = rank;
+        this.rel = rel;
     }
 
     @Override
@@ -156,7 +162,7 @@ class RetrievedResults implements Comparable<RetrievedResults> {
         String qid = relInfo.qid;
         
         for (ResultTuple rt : rtuples) {
-            Integer relIntObj = relInfo.relMap.get(rt.docName); 
+            Float relIntObj = relInfo.relMap.get(rt.docName);
             rt.rel = relIntObj == null? 0 : relIntObj.intValue();
         }
         this.relInfo = relInfo;
@@ -184,27 +190,40 @@ class RetrievedResults implements Comparable<RetrievedResults> {
         
     float computeDCG(List<ResultTuple> rtuples, int cutoff) {
         float dcgSum = 0;
-        int count = 1;
+        int rank = 1;
         for (ResultTuple tuple : rtuples) {            
-            int twoPowerRel = 1<<tuple.rel;
-            float dcg = (twoPowerRel - 1)/(float)(Math.log(count+1)/Math.log(2));
+            float dcg = tuple.rel/(float)(Math.log(rank+1)/Math.log(2));
             dcgSum += dcg;
-            if (count >= cutoff)
+            if (rank >= cutoff)
                 break;
-            count++;
+            rank++;
         }
         return dcgSum;
     }    
-    
-    float computeNDCG(int ntops) {
-        float dcg = 0, idcg = 0;
-        List<ResultTuple> idealTuples = new ArrayList<>(rtuples);
-        Collections.sort(idealTuples, new Comparator<ResultTuple>() {
+
+    List<ResultTuple> constructIdealList() { // Sort in decreasing order all the relevant docs
+        List<ResultTuple> idealRes = new ArrayList<>();
+        for (String docName: this.relInfo.relMap.keySet()) {
+            idealRes.add(new ResultTuple(docName, 0, this.relInfo.relMap.get(docName))); // rank=0 a placeholder
+        }
+        Collections.sort(idealRes, new Comparator<ResultTuple>() {
             @Override
             public int compare(ResultTuple thisObj, ResultTuple thatObj) { // descending in rel values
                 return thisObj.rel > thatObj.rel? -1 : thisObj.rel == thatObj.rel? 0 : 1;
             }
         });
+
+        // assign the ranks
+        int rank = 1;
+        for (ResultTuple rt: idealRes) {
+            rt.rank = rank++;
+        }
+        return idealRes;
+    }
+
+    float computeNDCG(int ntops) {
+        float dcg = 0, idcg = 0;
+        List<ResultTuple> idealTuples = constructIdealList();
                 
         dcg = computeDCG(this.rtuples, ntops);
         idcg = computeDCG(idealTuples, ntops);
@@ -314,7 +333,7 @@ class AllRetrievedResults {
                 float thisNDCG = res.computeNDCG(res.rtuples.size());
                 float thisNDCG_5 = res.computeNDCG(5);
                 ndcg += thisNDCG;
-                ndcg_5 = thisNDCG_5;
+                ndcg_5 += thisNDCG_5;
             }
         }
         

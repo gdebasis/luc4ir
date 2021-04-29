@@ -41,6 +41,7 @@ rlm.qe=false
 rlm.qe.nterms=10
 rlm.qe.newterms.wt=0.2
 
+evaluate.graded=true
 
 EOF1
 
