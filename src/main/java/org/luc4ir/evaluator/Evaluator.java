@@ -6,14 +6,7 @@ package org.luc4ir.evaluator;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TreeMap;
+import java.util.*;
 
 
 /**
@@ -84,7 +77,7 @@ class AllRelRcds {
             relTuple = new PerQueryRelDocs(qid);
             perQueryRels.put(qid, relTuple);
         }
-        relTuple.addTuple(tokens[2], Integer.parseInt(tokens[3]));
+        relTuple.addTuple(tokens[2], Float.parseFloat(tokens[3]));
     }
     
     public String toString() {
@@ -135,6 +128,9 @@ class RetrievedResults implements Comparable<RetrievedResults> {
     int numRelRet;
     float avgP;    
     PerQueryRelDocs relInfo;
+
+    // try rel/ret
+    static final String computeNDCGOver = "ret"; // change this to ret when u want the idea ranked list from ur ret list
     
     public RetrievedResults(String qid) {
         this.qid = qid;
@@ -201,10 +197,10 @@ class RetrievedResults implements Comparable<RetrievedResults> {
         return dcgSum;
     }    
 
-    List<ResultTuple> constructIdealList() { // Sort in decreasing order all the relevant docs
+    List<ResultTuple> constructIdealList(Map<String, Float> docRelMap) { // Sort in decreasing order all the relevant docs
         List<ResultTuple> idealRes = new ArrayList<>();
-        for (String docName: this.relInfo.relMap.keySet()) {
-            idealRes.add(new ResultTuple(docName, 0, this.relInfo.relMap.get(docName))); // rank=0 a placeholder
+        for (String docName: docRelMap.keySet()) {
+            idealRes.add(new ResultTuple(docName, 0, docRelMap.get(docName))); // rank=0 a placeholder
         }
         Collections.sort(idealRes, new Comparator<ResultTuple>() {
             @Override
@@ -223,8 +219,19 @@ class RetrievedResults implements Comparable<RetrievedResults> {
 
     float computeNDCG(int ntops) {
         float dcg = 0, idcg = 0;
-        List<ResultTuple> idealTuples = constructIdealList();
-                
+        List<ResultTuple> idealTuples;
+        Map<String, Float> docRelMap = new HashMap<>();
+
+        if (computeNDCGOver.equals("rel"))
+            docRelMap = this.relInfo.relMap;
+        else {
+            for (ResultTuple rt: this.rtuples) {
+                if (rt.rel > 0)
+                    docRelMap.put(rt.docName, rt.rel);
+            }
+        }
+
+        idealTuples = constructIdealList(docRelMap);
         dcg = computeDCG(this.rtuples, ntops);
         idcg = computeDCG(idealTuples, ntops);
         
@@ -355,6 +362,7 @@ public class Evaluator {
     AllRetrievedResults retRcds;
     static boolean graded;
     static int threshold;
+
     
     public Evaluator(String qrelsFile, String resFile) {
         relRcds = new AllRelRcds(qrelsFile);
