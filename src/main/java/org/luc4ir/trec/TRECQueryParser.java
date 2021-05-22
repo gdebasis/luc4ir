@@ -88,7 +88,8 @@ public class TRECQueryParser extends DefaultHandler {
         buff.append(new String(ch, start, length));
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        /*
         if (args.length < 1) {
             args = new String[1];
             args[0] = "init.properties";
@@ -107,6 +108,13 @@ public class TRECQueryParser extends DefaultHandler {
         }
         catch (Exception ex) {
             ex.printStackTrace();
+        }
+         */
+
+        TRECQueryParser parser = new TRECQueryParser("data/topics/all.xml", new EnglishAnalyzer());
+        parser.parse();
+        for (TRECQuery q : parser.queries) {
+            System.out.println(q.title.trim());
         }
     }
 }    
