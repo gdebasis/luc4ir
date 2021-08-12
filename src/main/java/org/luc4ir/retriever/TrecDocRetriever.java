@@ -10,6 +10,7 @@ package org.luc4ir.retriever;
  */
 
 import org.luc4ir.evaluator.Evaluator;
+import org.luc4ir.evaluator.PerQueryRelDocs;
 import org.luc4ir.feedback.RelevanceModelConditional;
 import org.luc4ir.feedback.RelevanceModelIId;
 import org.luc4ir.feedback.RetrievedDocTermInfo;
@@ -156,18 +157,28 @@ public class TrecDocRetriever {
     
     public void retrieveAll() throws Exception {
         TopDocs topDocs;
+        Map<String, TopDocs> topDocsMap = new HashMap<>();
+        Evaluator evaluator = null;
+
         String resultsFile = prop.getProperty("res.file");        
         FileWriter fw = new FileWriter(resultsFile);
-        
+        BufferedWriter bw = new BufferedWriter(fw);
+
         List<TRECQuery> queries = constructQueries();
-        
+        int start = Integer.parseInt(prop.getProperty("qid.start", "0"));
+        int end = Integer.parseInt(prop.getProperty("qid.end", "-1"));
+
         for (TRECQuery query : queries) {
+
+            if (Integer.parseInt(query.id) < start) continue;
+            if (Integer.parseInt(query.id) > end) break;
 
             // Print query
             System.out.println("Executing query: " + query.getLuceneQueryObj());
             
             // Retrieve results
             topDocs = retrieve(query);
+            topDocsMap.put(query.id, topDocs);
 
             // Apply feedback
             if (Boolean.parseBoolean(prop.getProperty("feedback")) && topDocs.scoreDocs.length > 0) {
@@ -175,15 +186,30 @@ public class TrecDocRetriever {
             }
             
             // Save results
-            saveRetrievedTuples(fw, query, topDocs);
+            saveRetrievedTuples(bw, query, topDocs);
         }
-        
-        fw.close();        
-        reader.close();
-        
+
+        bw.close();
+        fw.close();
+
         if (Boolean.parseBoolean(prop.getProperty("eval"))) {
-            evaluate();
+            evaluator = evaluate();
         }
+
+        resultsFile = prop.getProperty("res.file");
+        fw = new FileWriter(resultsFile + ".rel");
+        bw = new BufferedWriter(fw);
+
+        for (TRECQuery query : queries) {
+            if (Integer.parseInt(query.id) < start) continue;
+            if (Integer.parseInt(query.id) > end) break;
+
+            saveRetrievedTuples(bw, query, topDocsMap.get(query.id), evaluator);
+        }
+
+        bw.close();
+        fw.close();
+        reader.close();
     }
     
     public TopDocs applyFeedback(TRECQuery query, TopDocs topDocs) throws Exception {
@@ -204,9 +230,7 @@ public class TrecDocRetriever {
             else
                 System.out.println("Clarity: " + fdbkModel.getQueryClarity());
         }
-        
-        
-        
+
         postRLMQE = Boolean.parseBoolean(prop.getProperty("rlm.qe", "false"));
         TopDocs reranked = fdbkModel.rerankDocs();
         if (!postRLMQE)
@@ -221,26 +245,45 @@ public class TrecDocRetriever {
         return topDocs;
     }
     
-    public void evaluate() throws Exception {
+    public Evaluator evaluate() throws Exception {
         Evaluator evaluator = new Evaluator(this.getProperties());
         evaluator.load();
         evaluator.fillRelInfo();
-        System.out.println(evaluator.computeAll());        
+        System.out.println(evaluator.computeAll());
+        return evaluator;
     }
-    
-    public void saveRetrievedTuples(FileWriter fw, TRECQuery query, TopDocs topDocs) throws Exception {
+
+    public void saveRetrievedTuples(BufferedWriter bw, TRECQuery query, TopDocs topDocs) throws Exception {
+        saveRetrievedTuples(bw, query, topDocs, null);
+    }
+
+    public void saveRetrievedTuples(BufferedWriter bw, TRECQuery query, TopDocs topDocs, Evaluator evaluator) throws Exception {
+        PerQueryRelDocs perQueryRelDocs = null;
+        int rel = 0;
+        if (evaluator != null) {
+            perQueryRelDocs = evaluator.getRelRcds().getRelInfo(query.id);
+        }
+
         StringBuffer buff = new StringBuffer();
         ScoreDoc[] hits = topDocs.scoreDocs;
+
         for (int i = 0; i < hits.length; ++i) {
             int docId = hits[i].doc;
             Document d = searcher.doc(docId);
+            String docName = d.get(TrecDocIndexer.FIELD_ID);
+
+            if (perQueryRelDocs != null)
+                rel = perQueryRelDocs.isRel(docName);
+
             buff.append(query.id.trim()).append("\tQ0\t").
                     append(d.get(TrecDocIndexer.FIELD_ID)).append("\t").
                     append((i+1)).append("\t").
+                    append(rel).append("\t").
                     append(hits[i].score).append("\t").
                     append(runName).append("\n");                
         }
-        fw.write(buff.toString());        
+
+        bw.write(buff.toString());
     }
     
     public static void main(String[] args) {

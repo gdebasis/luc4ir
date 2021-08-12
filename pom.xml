@@ -142,7 +142,16 @@
             <configuration>
                 <mainClass>org.luc4ir.retriever.IndexToTsvConverter</mainClass>
             </configuration>
-        </execution>        
+        </execution>
+            <execution>
+                <id>orcasreldocs</id>
+                <goals>
+                    <goal>java</goal>
+                </goals>
+                <configuration>
+                    <mainClass>org.luc4ir.orcas.OrcasQueryDocPreparator</mainClass>
+                </configuration>
+            </execution>
         </executions>       
     </plugin>
     </plugins>

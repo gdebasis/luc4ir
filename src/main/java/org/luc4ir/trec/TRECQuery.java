@@ -35,14 +35,14 @@ public class TRECQuery {
     }
 
     public TRECQuery(TRECQuery that) { // copy constructor
-        this.id = that.id;
+        this.id = that.id.trim();
         this.title = that.title;
         this.desc = that.desc;
         this.narr = that.narr;
     }
     
     public TRECQuery(String id, Query luceneQuery) {
-        this.id = id;
+        this.id = id.trim();
         this.title = "";
         this.desc = ""; this.narr = "";
         this.luceneQuery = luceneQuery;

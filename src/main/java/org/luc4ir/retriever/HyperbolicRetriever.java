@@ -7,12 +7,17 @@ package org.luc4ir.retriever;
 
 import java.io.IOException;
 import java.util.*;
-import org.apache.lucene.index.IndexReader;
+
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.similarities.LMJelinekMercerSimilarity;
 import org.apache.lucene.search.similarities.Similarity;
+import org.luc4ir.feedback.RetrievedDocTermInfo;
+import org.luc4ir.indexing.TrecDocIndexer;
 import org.luc4ir.trec.TRECQuery;
+import org.luc4ir.feedback.RetrievedDocsTermStats;
+import org.luc4ir.feedback.PerDocTermVector;
+
 
 /**
  * Hyperbolic versions of standard retrieval models.
@@ -33,37 +38,73 @@ class TermWt {
 
 /* Augmented vector with the time dimension */
 class HypEmbVector implements Comparable<HypEmbVector> {
+
     int docId;     // identifies a document
-    List<TermWt> x; // space-like components
+    Map<String, TermWt> x; // space-like components
     float t;  // the time-like component
-    float k; // the curvature
-    float querySim;  // used to rank the hyperbolic document vectors
-    
+    float queryDist;  // used to rank the hyperbolic document vectors
+
+    static final float K = 1.0f;  // the curvature
+
     public HypEmbVector(int docId) {
         this.docId = docId;
-        x = new ArrayList<>();
+        x = new HashMap<>();
     }
     
     public HypEmbVector(Set<Term> qterms) {
         docId = -1; // < 0 denotes the query
         int numQTerms = qterms.size();
-        x = new ArrayList<>(numQTerms);
+        x = new HashMap<>(numQTerms);
         for (Term qterm: qterms) {
-            x.add(new TermWt(qterm.text(), 1));
+            x.put(qterm.text(), new TermWt(qterm.text(), 1));
         }        
     }
-    
-    void add(Term t, float score) {
-        String term = t.text();
-        x.add(new TermWt(term, score));
+
+    void add(String term, float score) {
+        x.put(term, new TermWt(term, score));
     }
-    
+
+    static HypEmbVector plus(HypEmbVector a, HypEmbVector b) {
+        return op(a, b, '+');
+    }
+
+    static HypEmbVector hadamard(HypEmbVector a, HypEmbVector b) {
+        return op(a, b, '*');
+    }
+
+    static HypEmbVector op(HypEmbVector a, HypEmbVector b, char op) {
+        HypEmbVector c = new HypEmbVector(a.docId);
+        float r = 0;
+
+        for (TermWt b_tw: b.x.values()) {
+            TermWt a_tw = a.x.get(b_tw.term);
+            if (a_tw != null) {
+                r = op=='+'? a_tw.wt + b_tw.wt: a_tw.wt * b_tw.wt;
+                c.x.put(a_tw.term, new TermWt(a_tw.term, r));
+            }
+        }
+        return c;
+    }
+
+    static HypEmbVector scale(HypEmbVector a, float alpha) {
+        HypEmbVector b = new HypEmbVector(a.docId);
+        for (TermWt tw: a.x.values()) {
+            b.x.put(tw.term, new TermWt(tw.term, tw.wt*alpha));
+        }
+        return b;
+    }
+
+    static HypEmbVector minus(HypEmbVector a, HypEmbVector b) {
+        return plus(a, scale(b, -1));
+    }
+
     float spaceInnerProduct(HypEmbVector another) {
         float inner_prod = 0;
-        int p = x.size();
-        
-        for (int i=0; i < p; i++) {
-            inner_prod += x.get(i).wt * another.x.get(i).wt;
+        for (TermWt that_tw: another.x.values()) {
+            TermWt tw = this.x.get(that_tw.term);
+            if (tw != null) {
+                inner_prod += tw.wt * that_tw.wt;
+            }
         }
         return inner_prod;
     }
@@ -76,94 +117,112 @@ class HypEmbVector implements Comparable<HypEmbVector> {
     // Embed in the hyperboloid by computing the value of the 't' component
     void embed() {        
         float spaceNormSquared = spaceNormSquared();
-        t = (float)Math.sqrt(1 + spaceNormSquared/(k*k));
+        t = (float)Math.sqrt(1 + spaceNormSquared/(K*K));
     }
-    
+
     float acosh(double x) {
         return (float)Math.log(x + Math.sqrt(x*x - 1.0));
     }    
     
     // arccosh (B(x,y)), where B(x,y) = x_0*y_0 - <inner product over space like coorodinates>
-    float computeDistance(HypEmbVector another) {
-        float bilinear = this.t * another.t - spaceInnerProduct(another);
-        assert (bilinear > 0);
+    float computeHyperbolicDistance(HypEmbVector another) {
+        float bilinear = this.t*another.t - spaceInnerProduct(another);
+        if (bilinear < 0) {
+            System.err.println("B(x, y) <= 0");
+            System.exit(1);
+        }
         return acosh(bilinear);
     }
     
-    void setQuerySim(float dist) {
-        querySim = (float)Math.exp(-dist);        
+    void setQueryDist(float dist) {
+        queryDist = dist;
     }
 
     @Override
     public int compareTo(HypEmbVector o) {
-        return Float.compare(o.querySim, querySim); // reverse order
+        return Float.compare(queryDist, o.queryDist);
     }
 }
 
 public class HyperbolicRetriever extends TrecDocRetriever {
-    Map<Integer, HypEmbVector> topDocsMap;
-    
-    static final int INVLIST_PERTRERM_SIZE = 5000;
+    static final float LAMBDA = 0.4f;
+    static final float ONE_MINUS_LAMBDA = 1.0f - LAMBDA;
+    float NUMDOCS;
+
+    List<HypEmbVector> docvecs = new ArrayList<>();
+    RetrievedDocsTermStats retrievedDocsTermStats;
 
     public HyperbolicRetriever(String propFile, Similarity sim) throws Exception {
         super(propFile, sim);
-        model = searcher.getSimilarity();
-        topDocsMap = new HashMap<>();
+        NUMDOCS = (float)reader.numDocs();
     }
     
-    void computeTermOverlapWeights(Term t) throws IOException {
-        TermQuery tq = new TermQuery(t);
-        TopDocs topDocs = searcher.search(tq, INVLIST_PERTRERM_SIZE);
-        ScoreDoc[] scoreDocs = topDocs.scoreDocs;
-        for (ScoreDoc sd: scoreDocs) {
-            HypEmbVector embvec = topDocsMap.get(sd.doc);
-            if (embvec == null) {
-                embvec = new HypEmbVector(sd.doc);
-                topDocsMap.put(sd.doc, embvec);
-            }
-            embvec.add(t, sd.score);
+    // embed docs and query on a hyperboloid; df_vec is the document frequency vector of query terms
+    void sortByHyperbolicDistances(List<HypEmbVector> docvecs, HypEmbVector q_dfvec) {
+        for (HypEmbVector dvec: docvecs) {
+            float queryDist = dvec.computeHyperbolicDistance(q_dfvec);
+            dvec.setQueryDist(queryDist);
         }
+        Collections.sort(docvecs);
     }
-    
-    // embed docs and query on a nhyperboloid
-    HypEmbVector[] sortByHyperbolicDistances(Map<Integer, HypEmbVector> topDocsMap, Set<Term> qTerms) {
-        
-        HypEmbVector[] docvecsArray = new HypEmbVector[topDocsMap.values().size()];
-        docvecsArray = topDocsMap.values().toArray(docvecsArray);
-        
-        HypEmbVector qvec = new HypEmbVector(qTerms);
-        qvec.embed();
-        
-        for (HypEmbVector dvec: docvecsArray) {
-            dvec.embed();
-            float queryDist = dvec.computeDistance(qvec);
-            dvec.setQuerySim(queryDist);
-        }
-        
-        Arrays.sort(docvecsArray); // sort in descending order by query-similarities
-        return docvecsArray;
+
+    float lmWt(String term, PerDocTermVector dvec) throws IOException {
+        Term t = new Term(TrecDocIndexer.FIELD_ANALYZED_CONTENT, term);
+        return LAMBDA * dvec.getNormalizedTf(term) + ONE_MINUS_LAMBDA * (float)Math.log(NUMDOCS/reader.docFreq(t));
     }
+
+    float lmWt(String term, int n) throws IOException {
+        Term t = new Term(TrecDocIndexer.FIELD_ANALYZED_CONTENT, term);
+        return LAMBDA * 1/(float)n + ONE_MINUS_LAMBDA * (float)Math.log(NUMDOCS/reader.docFreq(t));
+    }
+
     
     @Override
     TopDocs retrieve(TRECQuery query) throws IOException {
-        Query q = query.getLuceneQueryObj();
-        Set<Term> qTerms = new HashSet<>();
-        q.createWeight(this.searcher, ScoreMode.COMPLETE, 1).extractTerms(qTerms);
+        docvecs.clear();
 
-        // Accumulate the scores of a doc for each term 
+        Query q = query.getLuceneQueryObj();
+
+        Set<Term> qTerms = new HashSet<>();
+        TopDocs topDocs = searcher.search(q, numWanted);
+
+        ScoreDoc[] scoreDocs = topDocs.scoreDocs;
+        HypEmbVector qvec = new HypEmbVector(-1); // dummy id
+
+        q.createWeight(this.searcher, ScoreMode.COMPLETE, 1).extractTerms(qTerms);
         for (Term qTerm: qTerms) {
-            computeTermOverlapWeights(qTerm);
+            qvec.add(qTerm.text(), lmWt(qTerm.text(), qTerms.size()));
+        }
+        qvec.embed();
+
+        retrievedDocsTermStats = new RetrievedDocsTermStats(reader, topDocs, scoreDocs.length);
+        int rank = 0;
+        for (ScoreDoc sd: scoreDocs) {
+            HypEmbVector hypdvec = new HypEmbVector(sd.doc);
+            PerDocTermVector dvec = this.retrievedDocsTermStats.buildStatsForSingleDoc(sd.doc, ++rank, sd.score);
+
+            for (RetrievedDocTermInfo termInfo: dvec.getPerDocStats().values()) {
+                String term = termInfo.getTerm();
+                hypdvec.add(term, lmWt(term, dvec)); // components for all terms
+            }
+
+            HypEmbVector delq = HypEmbVector.minus(hypdvec, qvec); // difference of this doc (LM-wt) with query
+
+            delq.embed();  // difference vector of this doc with query
+            docvecs.add(delq);
+        }
+
+        sortByHyperbolicDistances(docvecs, qvec);
+
+        ScoreDoc[] rerankedSD = new ScoreDoc[topDocs.scoreDocs.length];
+        int i=0;
+        for (HypEmbVector dvec: docvecs) {
+            rerankedSD[i] = new ScoreDoc(dvec.docId, dvec.queryDist);
+            i++;
         }
         
-        HypEmbVector[] docvecs = sortByHyperbolicDistances(topDocsMap, qTerms);
-        ScoreDoc[] rerankedSD = new ScoreDoc[numWanted];
-        for (int i=0; i < numWanted; i++)
-            rerankedSD[i] = new ScoreDoc(docvecs[i].docId, docvecs[i].querySim);
-        
-        TopDocs topdocs = new TopDocs(
-                new TotalHits(numWanted, TotalHits.Relation.EQUAL_TO),
-                rerankedSD);
-        return topdocs;
+        topDocs = new TopDocs(new TotalHits(numWanted, TotalHits.Relation.EQUAL_TO), rerankedSD);
+        return topDocs;
     }
 
     public static void main(String[] args) {

@@ -8,7 +8,7 @@ cat > index.rcts.properties << EOF1
 coll=$COLL
 index=$INDEX
 stopfile=stop.txt
-sax.parser=generic
+parser=generic
 sax.docstart=clinical_study
 sax.docid=nct_id
 sax.content_tags=brief_summary,detailed_description,study_design_info,intervention,eligibility,clinical_results

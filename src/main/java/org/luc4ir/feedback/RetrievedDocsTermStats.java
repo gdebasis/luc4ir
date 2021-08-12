@@ -4,6 +4,7 @@
  */
 package org.luc4ir.feedback;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +61,7 @@ public class RetrievedDocsTermStats {
         return this.termStats.get(qTerm);        
     }
     
-    PerDocTermVector buildStatsForSingleDoc(int docId, int rank, float sim) throws Exception {
+    public PerDocTermVector buildStatsForSingleDoc(int docId, int rank, float sim) throws IOException {
         String termText;
         BytesRef term;
         Terms tfvector;

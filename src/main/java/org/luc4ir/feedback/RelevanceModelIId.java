@@ -46,9 +46,12 @@ public class RelevanceModelIId {
     int nterms;
     float fbweight;
     IndexReader reader;
+    PostFdbkReranker rerankerMethod;
+
     static final float TERM_SEL_DF_THRESH = 0.8f;
     
     public RelevanceModelIId(TrecDocRetriever retriever, TRECQuery trecQuery, TopDocs topDocs) throws Exception {
+        this(retriever, trecQuery, topDocs, new KLDivReranker());
         this.prop = retriever.getProperties();
         this.retriever = retriever;
         this.trecQuery = trecQuery;
@@ -59,7 +62,20 @@ public class RelevanceModelIId {
         nterms = Integer.parseInt(prop.getProperty("rlm.qe.nterms", "10"));
         fbweight = Float.parseFloat(prop.getProperty("rlm.qe.newterms.wt", "0.2"));
     }
-    
+
+    public RelevanceModelIId(TrecDocRetriever retriever, TRECQuery trecQuery, TopDocs topDocs, PostFdbkReranker rerankMethod) throws Exception {
+        this.rerankerMethod = rerankMethod;
+        this.prop = retriever.getProperties();
+        this.retriever = retriever;
+        this.trecQuery = trecQuery;
+        this.topDocs = topDocs;
+        numTopDocs = Integer.parseInt(prop.getProperty("fdbk.numtopdocs"));
+        mixingLambda = Float.parseFloat(prop.getProperty("fdbk.lambda"));
+
+        nterms = Integer.parseInt(prop.getProperty("rlm.qe.nterms", "10"));
+        fbweight = Float.parseFloat(prop.getProperty("rlm.qe.newterms.wt", "0.2"));
+    }
+
     public RetrievedDocsTermStats getRetrievedDocsTermStats() {
         return this.retrievedDocsTermStats;
     }
@@ -113,35 +129,8 @@ public class RelevanceModelIId {
     }
     
     public TopDocs rerankDocs() {
-        ScoreDoc[] klDivScoreDocs = new ScoreDoc[this.topDocs.scoreDocs.length];
-        float klDiv;
-        float p_w_D;    // P(w|D) for this doc D
-        final float EPSILON = 0.0001f;
-        
-        // For each document
-        for (int i = 0; i < topDocs.scoreDocs.length; i++) {
-            klDiv = 0;
-            klDivScoreDocs[i] = new ScoreDoc(topDocs.scoreDocs[i].doc, klDiv);
-            PerDocTermVector docVector = this.retrievedDocsTermStats.docTermVecs.get(i);
-            
-            // For each v \in V (vocab of top ranked documents)
-            for (Map.Entry<String, RetrievedDocTermInfo> e : retrievedDocsTermStats.termStats.entrySet()) {
-                RetrievedDocTermInfo w = e.getValue();
-                
-                float ntf = docVector.getNormalizedTf(w.getTerm());
-                if (ntf == 0)
-                    ntf = EPSILON;
-                p_w_D = ntf;
-                klDiv += w.wt * Math.log(w.wt/p_w_D);
-            }
-            klDivScoreDocs[i].score = klDiv;
-        }
-        
-        // Sort the scoredocs in ascending order of the KL-Div scores
-        Arrays.sort(klDivScoreDocs, new KLDivScoreComparator());
-        
-        TopDocs rerankedDocs = new TopDocs(topDocs.totalHits, klDivScoreDocs);
-        return rerankedDocs;
+        rerankerMethod.setStats(topDocs, retrievedDocsTermStats);
+        return rerankerMethod.rerankDocs();
     }
     
     public float getQueryClarity() {

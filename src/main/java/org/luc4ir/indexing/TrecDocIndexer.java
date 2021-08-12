@@ -29,9 +29,7 @@ import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.*;
-import org.apache.lucene.index.IndexOptions;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.*;
 import org.apache.lucene.store.FSDirectory;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -125,9 +123,24 @@ public class TrecDocIndexer {
             ex.printStackTrace();
         }
     }
+
+    void testIndex() {
+        // Test if the index can be opened. Print first two docs
+        try {
+            IndexReader reader = DirectoryReader.open(FSDirectory.open(indexDir.toPath()));
+            Document d = reader.document(0);
+            System.out.println(
+                d.get(TrecDocIndexer.FIELD_ID) + "\t" +
+                d.get(TrecDocIndexer.FIELD_ANALYZED_CONTENT)
+            );
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
     
     void processAll() throws Exception {
-        System.out.println("Indexing TREC collection...");
+        System.out.println("Indexing collection...");
         
         IndexWriterConfig iwcfg = new IndexWriterConfig(analyzer);
         iwcfg.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
@@ -140,8 +153,9 @@ public class TrecDocIndexer {
             indexAll();
         else
             indexTarGz();
-        
+
         writer.close();
+        //testIndex();
     }
     
     public File getIndexDir() { return indexDir; }
@@ -220,15 +234,39 @@ public class TrecDocIndexer {
         
         if (parser.equals("generic"))
             indexFileWithSAX(is);
-        else if (parser.equals("line"))
+        else if (parser.equals("annotated_lines"))
             indexFileWithLineReader(is);
+        else if (parser.equals("line_simple"))
+            indexFindexFileWithLineReaderSimple(is);
         else // put 'dom'... any other string (e.g. 'none') also works!
             indexFileWithDOM(is);
         
         if (is!=null)
             is.close();
     }
-    
+
+    // MSMARCO format... docid, url, text
+    void indexFindexFileWithLineReaderSimple(InputStream is) throws Exception {
+        Document doc;
+        String id = null;
+        String line;
+        int docCount = -1;
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+
+        while ((line = br.readLine())!= null) {
+            line = line.trim();
+            String[] parts = line.split("\t");
+            if (parts.length >= 4) {
+                doc = constructDoc(parts[0], parts[3]);
+                writer.addDocument(doc);
+
+                if (docCount++ % 10000 == 0)
+                    System.out.println(String.format("Indexed %d passages from Wiki", docCount));
+            }
+        }
+    }
+
     void indexFileWithLineReader(InputStream is) throws Exception {
         Document doc;
         String id = null;
@@ -334,14 +372,13 @@ public class TrecDocIndexer {
     
     public static void main(String[] args) {
         if (args.length == 0) {
-            args = new String[1];
-            System.out.println("Usage: java TrecDocIndexer <prop-file>");
-            args[0] = "init.properties";
+            System.err.println("Usage: java TrecDocIndexer <prop-file>");
+            return;
         }
 
         try {
             TrecDocIndexer indexer = new TrecDocIndexer(args[0]);
-            indexer.processAll();            
+            indexer.processAll();
         }
         catch (Exception ex) {
             ex.printStackTrace();

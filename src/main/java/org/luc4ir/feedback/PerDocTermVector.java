@@ -15,7 +15,7 @@ public class PerDocTermVector {
     int docId;
     int sum_tf;
     float sim;  // similarity with query
-    HashMap<String, RetrievedDocTermInfo> perDocStats;
+    HashMap<String, RetrievedDocTermInfo> perDocStats; // term --> wts
     
     public PerDocTermVector(int docId) {
         this.docId = docId;
@@ -29,9 +29,18 @@ public class PerDocTermVector {
             return 0;
         return perDocStats.get(term).tf/(float)sum_tf;
     }
-    
-    RetrievedDocTermInfo getTermStats(String qTerm) {
+
+    public float getTf(String term) {
+        RetrievedDocTermInfo tInfo = perDocStats.get(term);
+        if (tInfo == null)
+            return 0;
+        return perDocStats.get(term).tf;
+    }
+
+    public RetrievedDocTermInfo getTermStats(String qTerm) {
         return this.perDocStats.get(qTerm);
-    }    
+    }
+
+    public HashMap<String, RetrievedDocTermInfo> getPerDocStats() { return perDocStats; }
 }
 

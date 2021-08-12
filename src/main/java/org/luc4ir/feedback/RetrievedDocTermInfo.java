@@ -30,6 +30,7 @@ public class RetrievedDocTermInfo implements Comparable<RetrievedDocTermInfo> {
     }
     
     public float getWeight() { return wt; }
+    public int getTf() { return tf; }
     public void setWeight(float wt) { this.wt = wt; }
     
     public String getTerm() { return term; }    
