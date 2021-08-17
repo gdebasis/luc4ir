@@ -8,9 +8,14 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreMode;
+import org.luc4ir.indexing.TrecDocIndexer;
+import org.apache.lucene.analysis.Analyzer;
+
 
 /**
  *
@@ -29,6 +34,15 @@ public class TRECQuery {
     }
 
     public TRECQuery() {}
+
+    public TRECQuery(Analyzer analyzer, String content, String id) {
+        try {
+            this.id = id;
+            luceneQuery = new StandardQueryParser(analyzer).parse(
+                    content, TrecDocIndexer.FIELD_ANALYZED_CONTENT);
+        }
+        catch (Exception ex) { ex.printStackTrace(); }
+    }
 
     public TRECQuery(Query luceneQuery) {
         this.luceneQuery = luceneQuery;
