@@ -43,7 +43,11 @@ public class TrecDocRetriever {
     boolean postRLMQE;
     boolean postQERerank;
     Similarity model;
-    
+
+    public void setSimilarity(Similarity sim) {
+        searcher.setSimilarity(sim);
+    }
+
     public TrecDocRetriever(String propFile, Similarity sim) throws Exception {        
         indexer = new TrecDocIndexer(propFile);
         prop = indexer.getProperties();
@@ -165,13 +169,16 @@ public class TrecDocRetriever {
         BufferedWriter bw = new BufferedWriter(fw);
 
         List<TRECQuery> queries = constructQueries();
-        int start = Integer.parseInt(prop.getProperty("qid.start", "0"));
+        /*int start = Integer.parseInt(prop.getProperty("qid.start", "0"));
         int end = Integer.parseInt(prop.getProperty("qid.end", "-1"));
+         */
 
         for (TRECQuery query : queries) {
 
-            if (Integer.parseInt(query.id) < start) continue;
-            if (Integer.parseInt(query.id) > end) break;
+            /*
+            if (Integer.parseInt(query.id) < start && start>0) continue;
+            if (Integer.parseInt(query.id) > end && end>0) break;
+            */
 
             // Print query
             System.out.println("Executing query: " + query.getLuceneQueryObj());
@@ -195,21 +202,6 @@ public class TrecDocRetriever {
         if (Boolean.parseBoolean(prop.getProperty("eval"))) {
             evaluator = evaluate();
         }
-
-        resultsFile = prop.getProperty("res.file");
-        fw = new FileWriter(resultsFile + ".rel");
-        bw = new BufferedWriter(fw);
-
-        for (TRECQuery query : queries) {
-            if (Integer.parseInt(query.id) < start) continue;
-            if (Integer.parseInt(query.id) > end) break;
-
-            saveRetrievedTuples(bw, query, topDocsMap.get(query.id), evaluator);
-        }
-
-        bw.close();
-        fw.close();
-        reader.close();
     }
     
     public TopDocs applyFeedback(TRECQuery query, TopDocs topDocs) throws Exception {
@@ -291,10 +283,17 @@ public class TrecDocRetriever {
             args = new String[1];
             args[0] = "init.properties";
         }
-        
+        TrecDocRetriever searcher = null;
+        Similarity[] sims = { new BM25Similarity(), new LMDirichletSimilarity(), new LMJelinekMercerSimilarity(.4f)};
         try {
-            TrecDocRetriever searcher = new TrecDocRetriever(args[0], new LMJelinekMercerSimilarity(0.4f));            
-            searcher.retrieveAll();            
+            searcher = new TrecDocRetriever(args[0], new BM25Similarity());
+        }
+        catch (Exception ex) { ex.printStackTrace(); }
+
+        try {
+                searcher.setSimilarity(sims[0]);
+                searcher.retrieveAll();
+                searcher.reader.close();
         }
         catch (Exception ex) {
             ex.printStackTrace();
