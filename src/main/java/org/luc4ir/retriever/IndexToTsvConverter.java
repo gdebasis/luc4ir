@@ -35,7 +35,7 @@ public class IndexToTsvConverter {
         BufferedWriter bw = new BufferedWriter(fw);
         StringBuffer buff = new StringBuffer();
         
-        int numDocs = reader.numDocs();
+        int numDocs = 5; // reader.numDocs();
         
         for (int i=0; i < numDocs; i++) {
             Document d = reader.document(i);

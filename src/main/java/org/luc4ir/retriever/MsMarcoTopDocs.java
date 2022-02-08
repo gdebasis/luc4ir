@@ -20,7 +20,7 @@ public class MsMarcoTopDocs extends TrecDocRetriever {
 
     public MsMarcoTopDocs(String propFile, Similarity sim) throws Exception {
         super(propFile, sim);
-        numWanted = 1;
+        numWanted = 5;
     }
 
     @Override
@@ -47,14 +47,14 @@ public class MsMarcoTopDocs extends TrecDocRetriever {
         for (TRECQuery query : queries) {
             // Retrieve results
             topDocs = retrieve(query);
-            if (topDocs.scoreDocs.length == 0)
-                continue;
 
             System.out.print("Writing topdoc info for query " + query.id + "\r");
-            bw.write(query.id);
-            bw.write("\t");
-            bw.write(reader.document(topDocs.scoreDocs[0].doc).get(TrecDocIndexer.FIELD_ANALYZED_CONTENT));
-            bw.newLine();
+            for (int k=0; k < topDocs.scoreDocs.length; k++) {
+                bw.write(query.id);
+                bw.write("\t");
+                bw.write(reader.document(topDocs.scoreDocs[k].doc).get(TrecDocIndexer.FIELD_ANALYZED_CONTENT));
+                bw.newLine();
+            }
         }
 
         bw.close();
@@ -80,6 +80,8 @@ public class MsMarcoTopDocs extends TrecDocRetriever {
             MsMarcoTopDocs msMarcoTopDocs =
                     new MsMarcoTopDocs("msmarco/index.msmarco.properties",
                     new LMJelinekMercerSimilarity(0.6f));
+
+            //System.out.println(msMarcoTopDocs.reader.numDocs());
 
             msMarcoTopDocs.genIDFData("orcas/vocab.txt", "orcas/word_idf.txt");
             msMarcoTopDocs.retrieveAll();

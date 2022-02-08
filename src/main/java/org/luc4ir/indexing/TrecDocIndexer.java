@@ -171,6 +171,7 @@ public class TrecDocIndexer {
     }
 
     private void indexDirectory(File dir) throws Exception {
+        System.out.println("Indexing files in directory " + dir.getAbsolutePath());
         File[] files = dir.listFiles();
         for (int i=0; i < files.length; i++) {
             File f = files[i];
@@ -245,7 +246,7 @@ public class TrecDocIndexer {
             is.close();
     }
 
-    // MSMARCO format... docid, url, text
+    // MSMARCO format... docid, text
     void indexFindexFileWithLineReaderSimple(InputStream is) throws Exception {
         Document doc;
         String id = null;
@@ -257,14 +258,15 @@ public class TrecDocIndexer {
         while ((line = br.readLine())!= null) {
             line = line.trim();
             String[] parts = line.split("\t");
-            if (parts.length >= 4) {
-                doc = constructDoc(parts[0], parts[3]);
+            if (parts.length >= 1) {
+                doc = constructDoc(parts[0], parts[1]);
                 writer.addDocument(doc);
 
                 if (docCount++ % 10000 == 0)
-                    System.out.println(String.format("Indexed %d passages from Wiki", docCount));
+                    System.out.print(String.format("Indexed %d passages from MSMARCO\r", docCount));
             }
         }
+        System.out.println();
     }
 
     void indexFileWithLineReader(InputStream is) throws Exception {

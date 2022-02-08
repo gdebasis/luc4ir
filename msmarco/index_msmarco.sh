@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MSMARCO=/Users/debasis/research/common/msmarco
+MSMARCO=/Users/debasis/research/common/msmarco/passages
 COLL=$MSMARCO/coll/
 INDEX=$MSMARCO/index/
 
@@ -14,7 +14,7 @@ parser=line_simple
 EOF1
 
 cd ..
-mvn exec:java@index -Dexec.args="index.msmarco.properties"
+mvn exec:java@index -Dexec.args="msmarco/index.msmarco.properties"
 cd -
 
 
