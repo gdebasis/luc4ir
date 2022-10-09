@@ -7,6 +7,10 @@ package org.luc4ir.retriever;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.lucene.queryparser.xml.builders.BooleanQueryBuilder;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.similarities.LMJelinekMercerSimilarity;
 import org.apache.lucene.search.similarities.Similarity;
 import org.luc4ir.trec.TRECQuery;
@@ -54,7 +58,6 @@ public class VerboseQueryRetriever extends TrecDocRetriever {
         }
         
         final int WSIZE = 3;
-        
         try {
             VerboseQueryRetriever searcher = new VerboseQueryRetriever(args[0],
                     new LMJelinekMercerSimilarity(0.4f),
@@ -66,5 +69,5 @@ public class VerboseQueryRetriever extends TrecDocRetriever {
         catch (Exception ex) {
             ex.printStackTrace();
         }
-    }    
+    }
 }

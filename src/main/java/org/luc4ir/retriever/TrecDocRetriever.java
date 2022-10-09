@@ -189,6 +189,7 @@ public class TrecDocRetriever {
 
             // Apply feedback
             if (Boolean.parseBoolean(prop.getProperty("feedback")) && topDocs.scoreDocs.length > 0) {
+                System.out.println("Applying fdbk...");
                 topDocs = applyFeedback(query, topDocs);
             }
             
@@ -281,10 +282,10 @@ public class TrecDocRetriever {
     public static void main(String[] args) {
         if (args.length < 1) {
             args = new String[1];
-            args[0] = "init.properties";
+            args[0] = "retrieve.properties";
         }
         TrecDocRetriever searcher = null;
-        Similarity[] sims = { new BM25Similarity(), new LMDirichletSimilarity(), new LMJelinekMercerSimilarity(.4f)};
+        Similarity[] sims = {new BM25Similarity(), new LMDirichletSimilarity(), new LMJelinekMercerSimilarity(.4f)};
         try {
             searcher = new TrecDocRetriever(args[0], new BM25Similarity());
         }

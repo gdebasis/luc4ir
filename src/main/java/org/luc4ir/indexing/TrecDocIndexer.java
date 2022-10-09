@@ -13,16 +13,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.StopFilter;
@@ -76,6 +79,12 @@ public class TrecDocIndexer {
         Analyzer eanalyzer = new EnglishAnalyzer(
             StopFilter.makeStopSet(buildStopwordList("stopfile"))); // default analyzer
         return eanalyzer;        
+    }
+
+    static public Analyzer analyzer() throws IOException {
+        List<String> stopwords = FileUtils.readLines(new File("stop.txt"), Charset.defaultCharset());
+        Analyzer eanalyzer = new EnglishAnalyzer(StopFilter.makeStopSet(stopwords)); // default analyzer
+        return eanalyzer;
     }
     
     public TrecDocIndexer(String propFile) throws Exception {
@@ -258,7 +267,7 @@ public class TrecDocIndexer {
         while ((line = br.readLine())!= null) {
             line = line.trim();
             String[] parts = line.split("\t");
-            if (parts.length >= 1) {
+            if (parts.length >= 2) {
                 doc = constructDoc(parts[0], parts[1]);
                 writer.addDocument(doc);
 
