@@ -10,6 +10,13 @@ public class KLDivReranker implements PostFdbkReranker {
     TopDocs topDocs;
     RetrievedDocsTermStats retrievedDocsTermStats;
 
+    public KLDivReranker() {}
+
+    public KLDivReranker(TopDocs topDocs, RetrievedDocsTermStats retrievedDocsTermStats) {
+        this.topDocs = topDocs;
+        this.retrievedDocsTermStats = retrievedDocsTermStats;
+    }
+
     public void setStats(TopDocs topDocs, RetrievedDocsTermStats retrievedDocsTermStats) {
         this.topDocs = topDocs;
         this.retrievedDocsTermStats = retrievedDocsTermStats;

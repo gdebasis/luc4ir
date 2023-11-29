@@ -39,11 +39,14 @@ public class IndexTester {
         TrecDocIndexer indexer;
         IndexReader reader;
 
-        indexer = new TrecDocIndexer("msmarco/index.msmarco.properties");
+        //indexer = new TrecDocIndexer("msmarco/index.msmarco.properties");
+        indexer = new TrecDocIndexer("retrieve.properties");
         File indexDir = indexer.getIndexDir();
         reader = DirectoryReader.open(FSDirectory.open(indexDir.toPath()));
 
-        showTokensForField(reader, TrecDocIndexer.FIELD_ANALYZED_CONTENT, "msmarco/vocab.txt");
+        System.out.println("#docs in the index: " + reader.numDocs());
+
+        showTokensForField(reader, TrecDocIndexer.FIELD_ANALYZED_CONTENT, "vocab.trec.txt");
 
         /*
         Document d = reader.document(0);

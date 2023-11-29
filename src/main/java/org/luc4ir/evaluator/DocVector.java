@@ -5,6 +5,7 @@
  */
 package org.luc4ir.evaluator;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +16,9 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
+import org.luc4ir.indexing.TrecDocIndexer;
 
 /**
  *
@@ -138,6 +142,27 @@ public class DocVector {
             if (that_tf == null)
                 continue;
             sim += tf.freq * that_tf.freq;
+        }
+        return dLen==0 || qLen==0? 0 : sim/(dLen*qLen);
+    }
+
+    public float cosineSim(DocVector that, IndexReader reader) throws IOException {
+        float sim = 0;
+        float dLen = docLen();
+        float qLen = that.docLen();
+        int df;
+        int N = reader.numDocs();
+        double idf;
+
+        for (TermFreq tf: tfMap.values()) {
+            df = reader.docFreq(new Term(TrecDocIndexer.FIELD_ANALYZED_CONTENT, tf.term));
+            idf = Math.log(N/df);
+            idf = idf*idf;
+
+            TermFreq that_tf = that.tfMap.get(tf.term);
+            if (that_tf == null)
+                continue;
+            sim += tf.freq * that_tf.freq * idf;
         }
         return dLen==0 || qLen==0? 0 : sim/(dLen*qLen);
     }

@@ -29,6 +29,7 @@ public class RetrievedDocsTermStats {
     float sumSim;
     Map<String, RetrievedDocTermInfo> termStats;
     List<PerDocTermVector> docTermVecs;
+    Map<Integer, PerDocTermVector> docTermVectorMap;
     int numTopDocs;
     
     public RetrievedDocsTermStats(IndexReader reader,
@@ -50,9 +51,13 @@ public class RetrievedDocsTermStats {
     
     public void buildAllStats() throws Exception {
         int rank = 0;
+        docTermVectorMap = new HashMap<>();
+
         for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
             int docId = scoreDoc.doc;
-            docTermVecs.add(buildStatsForSingleDoc(docId, rank, scoreDoc.score));
+            PerDocTermVector pdv = buildStatsForSingleDoc(docId, rank, scoreDoc.score);
+            docTermVecs.add(pdv);
+            docTermVectorMap.put(docId, pdv);
             rank++;
         }
     }
