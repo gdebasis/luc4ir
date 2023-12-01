@@ -1,6 +1,5 @@
 package org.luc4ir.feedback;
 
-import jdk.internal.jshell.tool.StopDetectingInputStream;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
@@ -9,6 +8,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.util.BytesRef;
 import org.apache.pdfbox.preflight.metadata.PDFAIdentificationValidation;
 import org.luc4ir.evaluator.DocVector;
+import org.luc4ir.indexing.TrecDocIndexer;
 import org.luc4ir.retriever.TrecDocRetriever;
 import org.luc4ir.trec.TRECQuery;
 
@@ -20,11 +20,19 @@ import java.util.stream.Collectors;
 public class DiversityReranker extends KLDivReranker {
     int k; // number of diverse documents reported at top k
     int m; // number of candidate docs for reranking
+    TrecDocRetriever retriever;
 
     public DiversityReranker(TrecDocRetriever retriever, TRECQuery query, TopDocs topDocs, int k) {
         super(topDocs);
+        this.retriever = retriever;
         try {
             RelevanceModelIId fdbkModel = new RelevanceModelConditional(retriever, query, topDocs);
+            try {
+                fdbkModel.computeFdbkWeights();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            this.setStats(topDocs, fdbkModel.retrievedDocsTermStats);
             m = fdbkModel.numTopDocs;
         }
         catch (Exception ex) {
@@ -45,10 +53,11 @@ public class DiversityReranker extends KLDivReranker {
         PerDocTermVector pdv = this.retrievedDocsTermStats.docTermVectorMap.get(selectedDoc);
         HashMap<String, RetrievedDocTermInfo> del = pdv.getPerDocStats();
         for (Map.Entry<String, RetrievedDocTermInfo> docTermInfoEntry: del.entrySet()) {
-            String termId = docTermInfoEntry.getKey();
-            RetrievedDocTermInfo w = lm.get(termId);
+            String term = docTermInfoEntry.getKey();
+            RetrievedDocTermInfo w = lm.get(term);
             if (w==null) {
-                lm.put(termId, w);
+                w = new RetrievedDocTermInfo(term, 1);
+                lm.put(term, w);
             }
             w.wt += docTermInfoEntry.getValue().wt;
         }
@@ -68,18 +77,27 @@ public class DiversityReranker extends KLDivReranker {
 
             // For each v \in V (vocab of top ranked documents) -- compute score for this doc
             for (RetrievedDocTermInfo w: pool.values()) {
+                try {
+                    w.wt = w.tf/(float)pool.size() * (float) Math.log(retriever.getReader().numDocs() / (float)
+                            retriever.getReader().docFreq(
+                                    new Term(TrecDocIndexer.FIELD_ANALYZED_CONTENT, w.getTerm()))
+                    );
+                } catch (Exception ex) { ex.printStackTrace(); }
+
                 p_w_D = docVector.getNormalizedTf(w.getTerm());
+                //System.out.println(String.format("term:#%s# wt(d) = %.4f, w(M) = %.4f", w.term, p_w_D, w.wt));
                 sim_with_selected += w.wt * p_w_D; // wt already has idf
             }
             div_scores[i] = sd.score/sim_with_selected; // max numerator, min denom
         }
 
-        for (int i=start; i < topDocs.scoreDocs.length; i++) {
+        for (int i=start; i < N; i++) {
             ScoreDoc sd = topDocs.scoreDocs[i];
             if (div_scores[i] > max_score) {
                 max_score = div_scores[i];
                 docToSelectNext = i;
             }
+            System.out.println(String.format("div_score[%d] = %.4f", i, div_scores[i]));
         }
 
         return docToSelectNext;

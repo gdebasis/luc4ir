@@ -165,7 +165,6 @@ public class TrecDocRetriever {
     public void retrieveAll() throws Exception {
         TopDocs topDocs;
         Map<String, TopDocs> topDocsMap = new HashMap<>();
-        Evaluator evaluator = null;
 
         String resultsFile = prop.getProperty("res.file");        
         FileWriter fw = new FileWriter(resultsFile);
@@ -205,7 +204,7 @@ public class TrecDocRetriever {
         fw.close();
 
         if (Boolean.parseBoolean(prop.getProperty("eval"))) {
-            evaluator = evaluate();
+            evaluate();
         }
     }
     
@@ -242,12 +241,11 @@ public class TrecDocRetriever {
         return topDocs;
     }
     
-    public Evaluator evaluate() throws Exception {
+    public void evaluate() throws Exception {
         Evaluator evaluator = new Evaluator(this.getProperties());
         evaluator.load();
         evaluator.fillRelInfo();
         System.out.println(evaluator.computeAll());
-        return evaluator;
     }
 
     public void saveRetrievedTuples(BufferedWriter bw, TRECQuery query, TopDocs topDocs) throws Exception {
