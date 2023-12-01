@@ -9,20 +9,33 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.util.BytesRef;
 import org.apache.pdfbox.preflight.metadata.PDFAIdentificationValidation;
 import org.luc4ir.evaluator.DocVector;
+import org.luc4ir.retriever.TrecDocRetriever;
+import org.luc4ir.trec.TRECQuery;
 
 import java.util.*;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
 
-public class DivergenceReranker extends KLDivReranker {
-    int k;
-    public DivergenceReranker(TopDocs topDocs, RetrievedDocsTermStats retrievedDocsTermStats, int k) {
-        super(topDocs, retrievedDocsTermStats);
+public class DiversityReranker extends KLDivReranker {
+    int k; // number of diverse documents reported at top k
+    int m; // number of candidate docs for reranking
+
+    public DiversityReranker(TrecDocRetriever retriever, TRECQuery query, TopDocs topDocs, int k) {
+        super(topDocs);
+        try {
+            RelevanceModelIId fdbkModel = new RelevanceModelConditional(retriever, query, topDocs);
+            m = fdbkModel.numTopDocs;
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
         this.k = k; // subset of documents required. topdocs.length MUST be > k
     }
 
     void swap(TopDocs topDocs, int i, int j) {
+        if (i==j) return;
         ScoreDoc tmp = new ScoreDoc(topDocs.scoreDocs[j].doc, topDocs.scoreDocs[j].score);
         topDocs.scoreDocs[j] = topDocs.scoreDocs[i];
         topDocs.scoreDocs[i] = tmp;
@@ -41,7 +54,7 @@ public class DivergenceReranker extends KLDivReranker {
         }
     }
 
-    int selectNextDoc(TopDocs topDocs, HashMap<String, RetrievedDocTermInfo> selected, int start, int N) {
+    int selectNextDoc(TopDocs topDocs, HashMap<String, RetrievedDocTermInfo> pool, int start, int N) {
         int docToSelectNext = 0; float max_score = Float.MIN_VALUE;
         float[] div_scores = new float[N];
         float sim_with_selected;
@@ -54,11 +67,10 @@ public class DivergenceReranker extends KLDivReranker {
             sim_with_selected = 0; // for this doc
 
             // For each v \in V (vocab of top ranked documents) -- compute score for this doc
-            for (RetrievedDocTermInfo w: selected.values()) {
+            for (RetrievedDocTermInfo w: pool.values()) {
                 p_w_D = docVector.getNormalizedTf(w.getTerm());
                 sim_with_selected += w.wt * p_w_D; // wt already has idf
             }
-
             div_scores[i] = sd.score/sim_with_selected; // max numerator, min denom
         }
 
@@ -75,29 +87,38 @@ public class DivergenceReranker extends KLDivReranker {
 
     @Override
     public TopDocs rerankDocs() {
-        HashMap<String, RetrievedDocTermInfo> selected =
+        HashMap<String, RetrievedDocTermInfo> pool =
                 this.retrievedDocsTermStats.docTermVecs.get(0).perDocStats;
         List<ScoreDoc> reranked = new ArrayList(this.topDocs.scoreDocs.length);
         reranked.add(topDocs.scoreDocs[0]);
 
-        int start = 1, N = topDocs.scoreDocs.length;
+        int start = 1;
         int selectedDocIndex;
         int numSelected = 0;
 
         while (numSelected < k) {
-            if (start >= N)
+            if (start >= m)
                 break;
 
-            selectedDocIndex = selectNextDoc(topDocs, selected, start, N);
+            selectedDocIndex = selectNextDoc(topDocs, pool, start, m);
             reranked.add(topDocs.scoreDocs[selectedDocIndex]);
-            updateLM(selected, topDocs.scoreDocs[selectedDocIndex].doc); // expand the LM of what's selected
+            updateLM(pool, topDocs.scoreDocs[selectedDocIndex].doc); // expand the LM of what's selected
+
             numSelected++;
 
-            swap(topDocs, topDocs.scoreDocs.length-1, selectedDocIndex);
-            start++; N--;
+            swap(topDocs, start, selectedDocIndex); // push the selected doc at the top
+            start++; // repeat o the remaining set
         }
 
+        // Add the remainder to the list
+        for (int i=start; i< topDocs.scoreDocs.length; i++)
+            reranked.add(topDocs.scoreDocs[i]);
+
         TopDocs rerankedDocs = new TopDocs(topDocs.totalHits, reranked.stream().toArray(ScoreDoc[]::new));
+        int rank=1;
+        for (ScoreDoc scoreDoc: rerankedDocs.scoreDocs)
+            scoreDoc.score = 1.0f/rank++; // we make the scores a monotonically decreasing sequence
+
         return rerankedDocs;
     }
 }

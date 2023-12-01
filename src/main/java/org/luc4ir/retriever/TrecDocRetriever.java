@@ -11,12 +11,15 @@ package org.luc4ir.retriever;
 
 import org.luc4ir.evaluator.Evaluator;
 import org.luc4ir.evaluator.PerQueryRelDocs;
+import org.luc4ir.feedback.DiversityReranker;
 import org.luc4ir.feedback.RelevanceModelConditional;
 import org.luc4ir.feedback.RelevanceModelIId;
 import org.luc4ir.feedback.RetrievedDocTermInfo;
 import org.luc4ir.indexing.TrecDocIndexer;
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.*;
@@ -169,22 +172,23 @@ public class TrecDocRetriever {
         BufferedWriter bw = new BufferedWriter(fw);
 
         List<TRECQuery> queries = constructQueries();
-        /*int start = Integer.parseInt(prop.getProperty("qid.start", "0"));
-        int end = Integer.parseInt(prop.getProperty("qid.end", "-1"));
-         */
+
+        // just take the first two queries for test
+        queries = queries.stream().limit(1).collect(Collectors.toList());
 
         for (TRECQuery query : queries) {
-
-            /*
-            if (Integer.parseInt(query.id) < start && start>0) continue;
-            if (Integer.parseInt(query.id) > end && end>0) break;
-            */
-
             // Print query
             System.out.println("Executing query: " + query.getLuceneQueryObj());
             
             // Retrieve results
             topDocs = retrieve(query);
+
+            if (Boolean.parseBoolean(prop.getProperty("diversity.reranker", "false"))) {
+                int numDocsToDiversify = Integer.parseInt(prop.getProperty("diversity.rerank.numdocs", "5"));
+                DiversityReranker diversityReranker = new DiversityReranker(this, query, topDocs, numDocsToDiversify);
+                topDocs = diversityReranker.rerankDocs();
+            }
+
             topDocsMap.put(query.id, topDocs);
 
             // Apply feedback
