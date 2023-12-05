@@ -46,6 +46,16 @@ public class RetrievedResults implements Comparable<RetrievedResults> {
         this.relInfo = relInfo;
     }
 
+    float computeRR() {
+        float rr = 0;
+        for (ResultTuple tuple : this.rtuples) {
+            if (tuple.rel < Evaluator.threshold)
+                continue;
+            rr = 1/(float)tuple.rank;
+        }
+        return rr;
+    }
+
     float computeAP() {
         if (avgP > -1)
             return avgP;

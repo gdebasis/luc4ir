@@ -65,12 +65,28 @@ public class AllRetrievedResults {
         float ndcg = 0;
         float ndcg_5 = 0;
         int totalRelDocs = 0;
+        float mrr = 0;
+
+        int[] rr_dist = new int[5];
 
         for (Map.Entry<String, RetrievedResults> e : allRetMap.entrySet()) {
             RetrievedResults res = e.getValue();
             if (res.relInfo == null)
                 continue;
 
+            float rr = res.computeRR();
+            if (rr >= 0.5)
+                rr_dist[0]++;
+            else if (rr < 0.5 && rr >= 0.33)
+                rr_dist[1]++;
+            else if (rr < 0.33 && rr >= 0.25)
+                rr_dist[2]++;
+            else if (rr < 0.25 && rr >= 0.20)
+                rr_dist[3]++;
+            else
+                rr_dist[4]++;
+
+            mrr += res.computeRR();
             float ap = res.computeAP();
             map += ap;
             //gm_ap += ap>0? Math.log(ap): 0;
@@ -86,7 +102,10 @@ public class AllRetrievedResults {
             totalRelDocs += res.relInfo.numRel;
         }
 
+        System.out.println(rr_dist[0] + ", " + rr_dist[1] + ", " + rr_dist[2] + ", " + rr_dist[3] + ", " + rr_dist[4]);
+
         buff.append("recall:\t").append(numRelSeen/(float)totalRelDocs).append("\n");
+        buff.append("mrr:\t").append(mrr/numQueries).append("\n");
         buff.append("map:\t").append(map/numQueries).append("\n");
         //buff.append("gmap:\t").append((float)Math.exp(gm_ap/numQueries)).append("\n");
         buff.append("P@5:\t").append(pAt5/numQueries).append("\n");
