@@ -59,18 +59,22 @@ public class AllRetrievedResults {
         StringBuffer buff = new StringBuffer();
         float map = 0f;
         float gm_ap = 0f;
-        float avgRecall = 0f;
-        float numQueries = (float)allRetMap.size();
+        float numRelSeen = 0f;
+        float numQueries = 0;
         float pAt5 = 0f;
         float ndcg = 0;
         float ndcg_5 = 0;
+        int totalRelDocs = 0;
 
         for (Map.Entry<String, RetrievedResults> e : allRetMap.entrySet()) {
             RetrievedResults res = e.getValue();
+            if (res.relInfo == null)
+                continue;
+
             float ap = res.computeAP();
             map += ap;
             //gm_ap += ap>0? Math.log(ap): 0;
-            avgRecall += res.computeRecall();
+            numRelSeen += res.computeRecall();
             pAt5 += res.precAtTop(5);
             if (Evaluator.graded) {
                 float thisNDCG = res.computeNDCG(res.rtuples.size());
@@ -78,9 +82,11 @@ public class AllRetrievedResults {
                 ndcg += thisNDCG;
                 ndcg_5 += thisNDCG_5;
             }
+            numQueries++;
+            totalRelDocs += res.relInfo.numRel;
         }
 
-        buff.append("recall:\t").append(avgRecall/(float)allRelInfo.getTotalNumRel()).append("\n");
+        buff.append("recall:\t").append(numRelSeen/(float)totalRelDocs).append("\n");
         buff.append("map:\t").append(map/numQueries).append("\n");
         //buff.append("gmap:\t").append((float)Math.exp(gm_ap/numQueries)).append("\n");
         buff.append("P@5:\t").append(pAt5/numQueries).append("\n");

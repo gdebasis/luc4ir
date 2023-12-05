@@ -35,6 +35,8 @@ public class RetrievedResults implements Comparable<RetrievedResults> {
     }
 
     void fillRelInfo(PerQueryRelDocs relInfo) {
+        if (relInfo == null)
+            return;
         String qid = relInfo.qid;
 
         for (ResultTuple rt : rtuples) {

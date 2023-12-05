@@ -9,6 +9,7 @@ package org.luc4ir.retriever;
  * @author Debasis
  */
 
+import org.apache.commons.io.FileUtils;
 import org.luc4ir.evaluator.Evaluator;
 import org.luc4ir.evaluator.PerQueryRelDocs;
 import org.luc4ir.feedback.DiversityReranker;
@@ -17,6 +18,7 @@ import org.luc4ir.feedback.RelevanceModelIId;
 import org.luc4ir.feedback.RetrievedDocTermInfo;
 import org.luc4ir.indexing.TrecDocIndexer;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -79,11 +81,25 @@ public class TrecDocRetriever {
     public IndexReader getReader() { return reader; }
     public IndexSearcher getSearcher() { return searcher; }
     
-    public List<TRECQuery> constructQueries() throws Exception {        
+    public List<TRECQuery> constructQueries() throws Exception {
         String queryFile = prop.getProperty("query.file");
-        TRECQueryParser parser = new TRECQueryParser(queryFile, indexer.getAnalyzer());
-        parser.parse();
-        return parser.getQueries();
+        String parseMode = prop.getProperty("query.parser", "xml");
+
+        if (parseMode.equals("xml")) {
+            TRECQueryParser parser = new TRECQueryParser(queryFile, indexer.getAnalyzer());
+            parser.parse();
+            return parser.getQueries();
+        }
+        else {
+            return
+                FileUtils.readLines(new File(queryFile), StandardCharsets.UTF_8)
+                    .stream()
+                    .map(x -> x.split("\t"))
+                    .collect(Collectors.toMap(x -> x[0], x -> x[1]))
+                    .entrySet().stream().map(x -> new TRECQuery(this.indexer.getAnalyzer(), x.getValue(), x.getKey()))
+                    .collect(Collectors.toList())
+            ;
+        }
     }
     
     // Computes the similarity of two queries based on KL-divergence
@@ -284,7 +300,7 @@ public class TrecDocRetriever {
     public static void main(String[] args) {
         if (args.length < 1) {
             args = new String[1];
-            args[0] = "retrieve.properties";
+            args[0] = "trecdl.properties";
         }
         TrecDocRetriever searcher = null;
         Similarity[] sims = {new BM25Similarity(), new LMDirichletSimilarity(), new LMJelinekMercerSimilarity(.4f)};
