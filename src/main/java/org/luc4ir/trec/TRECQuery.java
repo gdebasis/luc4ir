@@ -10,9 +10,7 @@ import java.util.Set;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreMode;
+import org.apache.lucene.search.*;
 import org.luc4ir.indexing.TrecDocIndexer;
 import org.apache.lucene.analysis.Analyzer;
 
@@ -38,10 +36,21 @@ public class TRECQuery {
     public TRECQuery(Analyzer analyzer, String content, String id) {
         try {
             this.id = id;
-            luceneQuery = new StandardQueryParser(analyzer).parse(
-                    content, TrecDocIndexer.FIELD_ANALYZED_CONTENT);
+            luceneQuery =
+            //new StandardQueryParser(analyzer).parse(content, TrecDocIndexer.FIELD_ANALYZED_CONTENT);
+            makeQuery(analyzer, content);
         }
         catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    private Query makeQuery(Analyzer analyzer, String content) {
+        BooleanQuery.Builder qb = new BooleanQuery.Builder();
+        String[] tokens = TrecDocIndexer.analyze(analyzer, content).split("\\s+");
+        for (String token: tokens) {
+            TermQuery tq = new TermQuery(new Term(TrecDocIndexer.FIELD_ANALYZED_CONTENT, token));
+            qb.add(new BooleanClause(tq, BooleanClause.Occur.SHOULD));
+        }
+        return qb.build();
     }
 
     public TRECQuery(Query luceneQuery) {

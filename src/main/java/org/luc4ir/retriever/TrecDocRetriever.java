@@ -175,6 +175,7 @@ public class TrecDocRetriever {
     }
 
     TopDocs retrieve(TRECQuery query) throws IOException {
+        System.out.println("Retrieving " + numWanted + " documents for query " + query.getLuceneQueryObj().toString());
         return searcher.search(query.getLuceneQueryObj(), numWanted);
     }
     
@@ -192,9 +193,6 @@ public class TrecDocRetriever {
         queries = queries.stream().limit(1).collect(Collectors.toList());
 
         for (TRECQuery query : queries) {
-            // Print query
-            System.out.println("Executing query: " + query.getLuceneQueryObj());
-            
             // Retrieve results
             topDocs = retrieve(query);
 
@@ -289,7 +287,6 @@ public class TrecDocRetriever {
             buff.append(query.id.trim()).append("\tQ0\t").
                     append(d.get(TrecDocIndexer.FIELD_ID)).append("\t").
                     append((i+1)).append("\t").
-                    append(rel).append("\t").
                     append(hits[i].score).append("\t").
                     append(runName).append("\n");                
         }

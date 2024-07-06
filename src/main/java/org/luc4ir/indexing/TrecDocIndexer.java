@@ -34,10 +34,13 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.*;
 import org.apache.lucene.store.FSDirectory;
+import org.json.simple.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.xml.sax.helpers.DefaultHandler;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 /**
  *
@@ -56,6 +59,7 @@ public class TrecDocIndexer {
     
     static final public String FIELD_ID = "id";
     static final public String FIELD_ANALYZED_CONTENT = "words";  // Standard analyzer w/o stopwords.
+    static final public String FIELD_METADATA = "metadata";
 
     protected List<String> buildStopwordList(String stopwordFileName) {
         List<String> stopwords = new ArrayList<>();
@@ -214,6 +218,15 @@ public class TrecDocIndexer {
         return contentField;
     }
 
+    static Field constructMetadataField(String content) {
+        FieldType fieldType = new FieldType();
+        fieldType.setIndexOptions(IndexOptions.DOCS);
+        fieldType.setStored(true);    // default = false (same as Field.Store.NO)
+        fieldType.setTokenized(false);  // default = true (tokenize the content)
+        fieldType.setOmitNorms(false); // default = false (used when scoring)
+        return new Field(FIELD_METADATA, content, fieldType);
+    }
+
     Document constructDoc(String id, String content) throws IOException {
 
         Field idField = constructIDField(id);
@@ -248,6 +261,8 @@ public class TrecDocIndexer {
             indexFileWithLineReader(is);
         else if (parser.equals("line_simple"))
             indexFindexFileWithLineReaderSimple(is);
+        else if (parser.equals("json"))
+            indexToucheDocs(is);
         else // put 'dom'... any other string (e.g. 'none') also works!
             indexFileWithDOM(is);
         
@@ -273,6 +288,38 @@ public class TrecDocIndexer {
 
                 if (docCount++ % 10000 == 0)
                     System.out.print(String.format("Indexed %d passages from MSMARCO\r", docCount));
+            }
+        }
+        System.out.println();
+    }
+
+    void indexToucheDocs(InputStream is) throws Exception {
+        Document doc;
+        String line;
+        int docCount = -1;
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+        JSONParser parser = new JSONParser();
+
+        while ((line = br.readLine())!= null) {
+            line = line.trim();
+            JSONObject jsonLine = (JSONObject)parser.parse(new StringReader(line));
+
+            String id = jsonLine.get("_id").toString();
+            String content = jsonLine.get("title").toString() + " " + jsonLine.get("text").toString();
+            JSONObject metadata = (JSONObject)parser.parse(jsonLine.get("metadata").toString());
+            String stance = metadata.get("stance").toString();
+
+            doc = new Document();
+            doc.add(constructIDField(id));
+            doc.add(constructContentField(content));
+            doc.add(constructMetadataField(stance));
+
+            writer.addDocument(doc);
+
+            if (docCount++ % 10000 == 0) {
+                System.out.print(String.format("Indexed %d passages from ToucheV2\r", docCount));
+                System.out.println(id + "\t" + content + "\t" + stance);
             }
         }
         System.out.println();
@@ -384,7 +431,8 @@ public class TrecDocIndexer {
     public static void main(String[] args) {
         if (args.length == 0) {
             System.err.println("Usage: java TrecDocIndexer <prop-file>");
-            return;
+            args = new String[1];
+            args[0] = "touche.properties";
         }
 
         try {

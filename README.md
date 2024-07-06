@@ -1,6 +1,6 @@
 # Luc4IR
 
-This code is distributed in the hope that it'll be useful for IR practitioners and students who want to get started with retrieving documents from a collection and measure effectiveness with standard evaluation metrics.
+Luc4IR (pronounced Lucifer) is a Java implementation of sparse indexing and retrieval. The code is distributed in the hope that it'll be useful for IR practitioners and students who want to get started with retrieving documents from a collection and measure effectiveness with standard evaluation metrics.
 
 
 ### To index TREC document disks 4/5
@@ -20,3 +20,5 @@ For retrieval, simply run the script
 ```
 which executes a series of queries from a TREC formatted topic file (using the LM-Dir retrieval model) and reports [MAP]([https://en.wikipedia.org/wiki/Evaluation_measures_(information_retrieval)#Mean_average_precision](https://en.wikipedia.org/wiki/Evaluation_measures_(information_retrieval)#Mean_average_precision)).
 
+Another small test collection that is included in the repository is the [ToucheV2](https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/webis-touche2020.zip) dataset. To run BM25 just execute the following commands, which will prepare the index and execure retrieval on 49 test queries. The result file, named `touche.res` is saved in the project base folder, which can then be evaluated with [trec_eval](https://github.com/usnistgov/trec_eval).
+  

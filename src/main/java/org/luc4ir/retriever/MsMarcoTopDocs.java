@@ -20,17 +20,17 @@ public class MsMarcoTopDocs extends TrecDocRetriever {
 
     public MsMarcoTopDocs(String propFile, Similarity sim) throws Exception {
         super(propFile, sim);
-        numWanted = 5;
     }
 
     @Override
     public List<TRECQuery> constructQueries() throws Exception {
-        final String queryFile = "orcas/queries.txt"; // qid "\t" query
+        final String queryFile = prop.getProperty("query.file"); // qid "\t" query
         List<String> lines = FileUtils.readLines(new File(queryFile), Charset.defaultCharset());
         List<TRECQuery> trecFmtQueries = new ArrayList<>(lines.size());
         for (String line: lines) {
             String[] parts = line.split("\t");
-            trecFmtQueries.add(new TRECQuery(indexer.getAnalyzer(), parts[1], parts[0]));
+            TRECQuery q = new TRECQuery(indexer.getAnalyzer(), parts[1], parts[0]);
+            trecFmtQueries.add(q);
         }
         return trecFmtQueries;
     }
@@ -38,23 +38,14 @@ public class MsMarcoTopDocs extends TrecDocRetriever {
 
     public void retrieveAll() throws Exception {
         TopDocs topDocs;
-        Map<String, TopDocs> topDocsMap = new HashMap<>();
-        int docId;
 
-        BufferedWriter bw = new BufferedWriter(new FileWriter("orcas/qid_topdoc.txt"));
+        BufferedWriter bw = new BufferedWriter(new FileWriter(prop.getProperty("res.file")));
 
         List<TRECQuery> queries = constructQueries();
         for (TRECQuery query : queries) {
             // Retrieve results
             topDocs = retrieve(query);
-
-            System.out.print("Writing topdoc info for query " + query.id + "\r");
-            for (int k=0; k < topDocs.scoreDocs.length; k++) {
-                bw.write(query.id);
-                bw.write("\t");
-                bw.write(reader.document(topDocs.scoreDocs[k].doc).get(TrecDocIndexer.FIELD_ANALYZED_CONTENT));
-                bw.newLine();
-            }
+            saveRetrievedTuples(bw, query, topDocs);
         }
 
         bw.close();
@@ -78,12 +69,14 @@ public class MsMarcoTopDocs extends TrecDocRetriever {
     public static void main(String[] args) {
         try {
             MsMarcoTopDocs msMarcoTopDocs =
-                    new MsMarcoTopDocs("msmarco/index.msmarco.properties",
-                    new LMJelinekMercerSimilarity(0.6f));
+                    //new MsMarcoTopDocs("msmarco/index.msmarco.properties",
+                    new MsMarcoTopDocs("touche.properties",
+                    new LMJelinekMercerSimilarity(0.6f)
+            );
 
             //System.out.println(msMarcoTopDocs.reader.numDocs());
 
-            msMarcoTopDocs.genIDFData("orcas/vocab.txt", "orcas/word_idf.txt");
+            //msMarcoTopDocs.genIDFData("orcas/vocab.txt", "orcas/word_idf.txt");
             msMarcoTopDocs.retrieveAll();
         }
         catch (Exception ex) { ex.printStackTrace(); }

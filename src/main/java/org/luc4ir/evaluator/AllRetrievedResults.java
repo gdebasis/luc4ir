@@ -93,8 +93,8 @@ public class AllRetrievedResults {
             numRelSeen += res.computeRecall();
             pAt5 += res.precAtTop(5);
             if (Evaluator.graded) {
-                float thisNDCG = res.computeNDCG(res.rtuples.size());
-                float thisNDCG_5 = res.computeNDCG(5);
+                float thisNDCG = res.computeNdcg(res.rtuples.size());
+                float thisNDCG_5 = res.computeNdcg(5);
                 ndcg += thisNDCG;
                 ndcg_5 += thisNDCG_5;
             }

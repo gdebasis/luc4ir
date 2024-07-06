@@ -25,19 +25,18 @@ res.file=res.txt
 qrels.file=$QRELS
 
 retrieve.runname=lm
-lm.lambda=0.4
 
 #workflow switches
 feedback=$FDBK
 eval=true
 
-fdbk.numtopdocs=10
+fdbk.numtopdocs=30
 fdbk.lambda=1
 
 #types allowed: rlm_iid/rlm_cond
 rlm.type=rlm_cond
 
-rlm.qe=false
+rlm.qe=true
 rlm.qe.nterms=10
 rlm.qe.newterms.wt=0.2
 

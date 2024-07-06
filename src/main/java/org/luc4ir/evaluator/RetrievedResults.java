@@ -1,6 +1,7 @@
 package org.luc4ir.evaluator;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class RetrievedResults implements Comparable<RetrievedResults> {
     String qid;
@@ -109,25 +110,43 @@ public class RetrievedResults implements Comparable<RetrievedResults> {
         return idealRes;
     }
 
-    float computeNDCG(int ntops) {
-        float dcg = 0, idcg = 0;
-        List<ResultTuple> idealTuples;
-        Map<String, Float> docRelMap = new HashMap<>();
+    double log2(float x) {
+        return Math.log(x)/Math.log(2);
+    }
 
-        if (computeNDCGOver.equals("rel"))
-            docRelMap = this.relInfo.relMap;
-        else {
-            for (ResultTuple rt: this.rtuples) {
-                if (rt.rel > 0)
-                    docRelMap.put(rt.docName, rt.rel);
-            }
+    float calcDCG(List<Float> relLabels) {
+        int rank = 1;
+        float ndcg = 0;
+        for (Float relLabel: relLabels) {
+            ndcg += (float)relLabel.intValue()/log2(rank+1);
+            rank++;
         }
+        return ndcg;
+    }
 
-        idealTuples = constructIdealList(docRelMap);
-        dcg = computeDCG(this.rtuples, ntops);
-        idcg = computeDCG(idealTuples, ntops);
+    public float computeNdcg(int cutoff) {
+        List<Float> rels =
+                relInfo.relMap.values()
+                        .stream()
+                        .sorted(Comparator.reverseOrder())  // more relevant at a smaller rank value is ideal
+                        .limit(cutoff)
+                        .collect(Collectors.toList());
 
-        return idcg>0? dcg/idcg: 0;
+        float idcg = calcDCG(rels);
+        if (idcg == 0)
+            return 0;
+
+        List<Float> rets = this.rtuples.stream()
+                .limit(cutoff)
+                .map(x->x.rel)
+                .collect(Collectors.toList());
+        float dcg = calcDCG(rets);
+
+        //System.out.println(rels);
+        //System.out.println(rets);
+
+        //System.out.println(String.format("%.4f %.4f", dcg, idcg));
+        return dcg/idcg;
     }
 
     float precAtTop(int k) {
