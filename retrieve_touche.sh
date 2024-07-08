@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cat > retrieve.properties << EOF1
+cat > touche.properties << EOF1
 coll=webis-touche2020/coll
 index=$INDEX_DIR
 

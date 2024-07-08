@@ -17,7 +17,7 @@ rm -rf webis-touche2020*
 cd -
 fi
 
-cat > index.properties << EOF1
+cat > touche.properties << EOF1
 
 coll=$COLLDIR
 index=$INDEX_DIR
