@@ -8,10 +8,9 @@ package org.luc4ir.qsel;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.StopFilter;
@@ -44,6 +43,16 @@ class WindowScore implements Comparable<WindowScore> {
     public int compareTo(WindowScore that) {
         return Float.compare(score, that.score);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("Window: <");
+        for (String token: tokens) {
+            sb.append(token).append(" ");
+        }
+        sb.append(">: ").append(score);
+        return sb.toString();
+    }
 }
 
 public class QuerySelector {
@@ -64,14 +73,27 @@ public class QuerySelector {
         this.wsf = wsf;
         this.windowSize = windowSize;
     }
-    
-    // select terms from the desc field
-    public Query constructQuery() {
-        String text = query.desc;
-        String[] tokens = TrecDocIndexer.analyze(analyzer, text).split("\\s+");
+
+    public QuerySelector(IndexReader reader, Analyzer analyzer, WindowScoringFunction wsf, int windowSize) {
+        this.reader = reader;
+        this.analyzer = analyzer;
+        this.wsf = wsf;
+        this.windowSize = windowSize;
+    }
+
+    public Query constructQuery(String queryText, String text, int nWindows) {
+        String[] queryTextTokens = TrecDocIndexer.analyze(analyzer, queryText).split("\\s+");
+        BooleanQuery.Builder selectedQueryBuilder = new BooleanQuery.Builder();
+        // The original query terms
+        for (String token: queryTextTokens) {
+            TermQuery tq = new TermQuery(new Term(TrecDocIndexer.FIELD_ANALYZED_CONTENT, token));
+            selectedQueryBuilder.add(new BooleanClause(tq, BooleanClause.Occur.SHOULD));
+        }
+
         int start = 0;
+        String[] tokens = TrecDocIndexer.analyze(analyzer, text).split("\\s+");
         List<WindowScore> windowScores = new ArrayList<>();
-        
+
         while (start < tokens.length) {
             int n = Math.min(windowSize, tokens.length-start);
             String[] span = new String[n];
@@ -80,18 +102,24 @@ public class QuerySelector {
             windowScores.add(new WindowScore(span, start, idfScore));
             start++;
         }
-        
-        // sort and take the last (max) scored one....
-        Collections.sort(windowScores);
-        WindowScore bestWindow = windowScores.get(windowScores.size()-1);
-        
-        // construct the Query object from the best window
-        BooleanQuery.Builder selectedQueryBuilder = new BooleanQuery.Builder();
-        for (String token: bestWindow.tokens) {
-            TermQuery tq = new TermQuery(new Term(TrecDocIndexer.FIELD_ANALYZED_CONTENT, token));
-            selectedQueryBuilder.add(new BooleanClause(tq, BooleanClause.Occur.SHOULD));
+
+        List<WindowScore> topWindows =
+                windowScores.stream().sorted(Comparator.reverseOrder())
+                .limit(nWindows).collect(Collectors.toList());
+
+        for (WindowScore bestWindow: topWindows) {
+            System.out.println(bestWindow);
+            // construct the Query object from the best window
+            for (String token : bestWindow.tokens) {
+                TermQuery tq = new TermQuery(new Term(TrecDocIndexer.FIELD_ANALYZED_CONTENT, token));
+                selectedQueryBuilder.add(new BooleanClause(tq, BooleanClause.Occur.SHOULD));
+            }
         }
-        
         return (Query)selectedQueryBuilder.build();
+    }
+
+    // select terms from the desc field
+    public Query constructQuery() {
+        return constructQuery("", query.desc, 1);
     }
 }

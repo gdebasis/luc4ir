@@ -16,6 +16,8 @@ public class AllRelRcds {
         totalNumRel = 0;
     }
 
+    public HashMap<String, PerQueryRelDocs> getPerQueryRels() { return perQueryRels; }
+
     int getTotalNumRel() {
         if (totalNumRel > 0)
             return totalNumRel;
@@ -27,7 +29,7 @@ public class AllRelRcds {
         return totalNumRel;
     }
 
-    void load() throws Exception {
+    public void load() throws Exception {
         FileReader fr = new FileReader(qrelsFile);
         BufferedReader br = new BufferedReader(fr);
         String line;

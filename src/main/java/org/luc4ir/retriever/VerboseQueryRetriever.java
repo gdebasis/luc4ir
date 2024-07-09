@@ -5,6 +5,7 @@
  */
 package org.luc4ir.retriever;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 

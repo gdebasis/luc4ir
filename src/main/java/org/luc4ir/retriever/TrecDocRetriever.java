@@ -262,15 +262,11 @@ public class TrecDocRetriever {
         System.out.println(evaluator.computeAll());
     }
 
-    public void saveRetrievedTuples(BufferedWriter bw, TRECQuery query, TopDocs topDocs) throws Exception {
-        saveRetrievedTuples(bw, query, topDocs, null);
-    }
-
-    public void saveRetrievedTuples(BufferedWriter bw, TRECQuery query, TopDocs topDocs, Evaluator evaluator) throws Exception {
+    public void saveRetrievedTuples(BufferedWriter bw, String queryId, TopDocs topDocs, Evaluator evaluator) throws Exception {
         PerQueryRelDocs perQueryRelDocs = null;
         int rel = 0;
         if (evaluator != null) {
-            perQueryRelDocs = evaluator.getRelRcds().getRelInfo(query.id);
+            perQueryRelDocs = evaluator.getRelRcds().getRelInfo(queryId);
         }
 
         StringBuffer buff = new StringBuffer();
@@ -284,14 +280,26 @@ public class TrecDocRetriever {
             if (perQueryRelDocs != null)
                 rel = perQueryRelDocs.isRel(docName);
 
-            buff.append(query.id.trim()).append("\tQ0\t").
+            buff.append(queryId.trim()).append("\tQ0\t").
                     append(d.get(TrecDocIndexer.FIELD_ID)).append("\t").
                     append((i+1)).append("\t").
                     append(hits[i].score).append("\t").
-                    append(runName).append("\n");                
+                    append(runName).append("\n");
         }
 
         bw.write(buff.toString());
+    }
+
+    public void saveRetrievedTuples(BufferedWriter bw, TRECQuery query, TopDocs topDocs) throws Exception {
+        saveRetrievedTuples(bw, query.id, topDocs, null);
+    }
+
+    public void saveRetrievedTuples(BufferedWriter bw, String queryId, TopDocs topDocs) throws Exception {
+        saveRetrievedTuples(bw, queryId, topDocs, null);
+    }
+
+    public void saveRetrievedTuples(BufferedWriter bw, TRECQuery query, TopDocs topDocs, Evaluator evaluator) throws Exception {
+        saveRetrievedTuples(bw, query.id, topDocs, evaluator);
     }
     
     public static void main(String[] args) {

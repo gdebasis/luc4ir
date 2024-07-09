@@ -22,6 +22,10 @@ public class PerQueryRelDocs {
         }
     }
 
+    public HashMap<String, Float> getRelDocs() {
+        return this.relMap;
+    }
+
     public int isRel(String docName) {
         Float rel = relMap.get(docName);
         return rel==null? 0 : rel.intValue();

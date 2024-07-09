@@ -36,6 +36,7 @@ public class TRECQuery {
     public TRECQuery(Analyzer analyzer, String content, String id) {
         try {
             this.id = id;
+            this.title = content;
             luceneQuery =
             //new StandardQueryParser(analyzer).parse(content, TrecDocIndexer.FIELD_ANALYZED_CONTENT);
             makeQuery(analyzer, content);
