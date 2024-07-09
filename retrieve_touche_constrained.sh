@@ -15,6 +15,9 @@ qrels.file=webis-touche2020/qrels.relonly.txt
 
 query.fields=t
 retrieval.constrained=true
+retrieval.constrained.wsize=3
+retrieval.constrained.numwindows=5
+
 retrieve.num_wanted=1000
 
 EOF1

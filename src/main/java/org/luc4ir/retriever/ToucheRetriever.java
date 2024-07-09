@@ -29,10 +29,14 @@ import java.util.Map;
 
 public class ToucheRetriever extends MsMarcoTopDocs {
     AllRelRcds relRcds;
-    final int NUM_WINDOWS = 1;
+    int numWindows;
+    int windowSize;
 
     public ToucheRetriever(String propFile, Similarity sim) throws Exception {
         super(propFile, sim);
+        numWindows = Integer.parseInt(prop.getProperty("retrieval.constrained.numwindows", "5"));
+        windowSize = Integer.parseInt(prop.getProperty("retrieval.constrained.wsize", "3"));
+
         String qrelsFile = this.getProperties().getProperty("qrels.file");
 
         relRcds = new AllRelRcds(qrelsFile);
@@ -53,8 +57,8 @@ public class ToucheRetriever extends MsMarcoTopDocs {
 
     Query extractQueryFromDoc(String queryText, String docText) throws IOException {
         QuerySelector qsel = new QuerySelector(reader, this.indexer.getAnalyzer(),
-                new IdfWindowScoringFunction(), 3);
-        return qsel.constructQuery(queryText, docText, NUM_WINDOWS);
+                new IdfWindowScoringFunction(), windowSize);
+        return qsel.constructQuery(queryText, docText, numWindows);
     }
 
     private void retrieveForArguments(BufferedWriter bw, TRECQuery query, AllRelRcds relRcds) throws Exception {
