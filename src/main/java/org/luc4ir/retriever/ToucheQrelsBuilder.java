@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class ToucheQrelsBuilder {
 
-    static Boolean getMetadata(IndexSearcher searcher,String docId) throws IOException {
+    static Boolean getMetadata(IndexSearcher searcher, String docId) throws IOException {
         Query query = new TermQuery(new Term(TrecDocIndexer.FIELD_ID, docId));
         TopDocs topDocs = searcher.search(query, 1);
         if (topDocs.scoreDocs.length == 0) return null;

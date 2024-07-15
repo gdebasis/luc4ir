@@ -3,17 +3,15 @@ package org.luc4ir.retriever;
 import org.apache.commons.io.FileUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.*;
 import org.apache.lucene.search.similarities.BM25Similarity;
-import org.apache.lucene.search.similarities.LMJelinekMercerSimilarity;
 import org.apache.lucene.search.similarities.Similarity;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.luc4ir.evaluator.AllRelRcds;
+import org.luc4ir.evaluator.DocVector;
 import org.luc4ir.evaluator.PerQueryRelDocs;
+import org.luc4ir.genutils.ScoreDocUtils;
 import org.luc4ir.indexing.TrecDocIndexer;
 import org.luc4ir.qsel.IdfWindowScoringFunction;
 import org.luc4ir.qsel.QuerySelector;
@@ -22,10 +20,8 @@ import ucar.nc2.util.IO;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ToucheRetriever extends MsMarcoTopDocs {
     AllRelRcds relRcds;
@@ -55,23 +51,107 @@ public class ToucheRetriever extends MsMarcoTopDocs {
         return doc;
     }
 
-    Query extractQueryFromDoc(String queryText, String docText) throws IOException {
-        QuerySelector qsel = new QuerySelector(reader, this.indexer.getAnalyzer(),
-                new IdfWindowScoringFunction(), windowSize);
-        return qsel.constructQuery(queryText, docText, numWindows);
+    Query constructQuery(String queryText) {
+        String[] queryTextTokens = TrecDocIndexer.analyze(this.indexer.getAnalyzer(), queryText).split("\\s+");
+        BooleanQuery.Builder qb = new BooleanQuery.Builder();
+        // The original query terms
+        for (String token : queryTextTokens) {
+            TermQuery tq = new TermQuery(new Term(TrecDocIndexer.FIELD_ANALYZED_CONTENT, token));
+            qb.add(new BooleanClause(tq, BooleanClause.Occur.SHOULD));
+        }
+        return qb.build();
     }
 
-    private void retrieveForArguments(BufferedWriter bw, TRECQuery query, AllRelRcds relRcds) throws Exception {
+    TopDocs retrieveConstrained(String queryText, String docText) throws IOException {
+        TopDocs topDocs = null;
+        Query topicQuery = constructQuery(queryText);
+        QuerySelector qsel = new QuerySelector(reader, this.indexer.getAnalyzer(),
+                new IdfWindowScoringFunction(), windowSize);
+
+        //System.out.println(String.format("Retrieving with query: %s", topicQuery));
+        TopDocs topDocs_topicQuery = searcher.search(topicQuery, numWanted);
+
+        if (numWindows == 0)
+            return topDocs_topicQuery;
+
+        Query argQuery = qsel.constructQuery(docText, numWindows);
+
+        //System.out.println(String.format("Retrieving with query: %s", argQuery));
+        TopDocs topDocs_argQuery = searcher.search(argQuery, numWanted);
+
+        /*
+        // RR fusion
+        topDocs = new RRFusion().combine(
+                topDocs_topicQuery.scoreDocs,
+                topDocs_argQuery.scoreDocs,
+                numWanted)
+        ;
+         */
+        return topDocs_argQuery;
+    }
+
+    List<DocVector> topDocVecs(TopDocs topDocs) throws IOException {
+        List<DocVector> dvecs = new ArrayList<>();
+        for (ScoreDoc sd: topDocs.scoreDocs) {
+            Document d = reader.document(sd.doc);
+            DocVector dv = new DocVector(d.get(TrecDocIndexer.FIELD_ANALYZED_CONTENT));
+            dvecs.add(dv);
+        }
+        return dvecs;
+    }
+
+    float proConRatio(Set<String> docNames) throws IOException {
+        int numPro = 0;
+        for (String docName: docNames) {
+            boolean pro = ToucheQrelsBuilder.getMetadata(searcher, docName);
+            if (pro)
+                numPro++;
+        }
+        return numPro/(float)(docNames.size());
+    }
+
+    float computeProConRatio(String qid, TopDocs topDocs) throws IOException {
+        Set<String> relDocNames = relRcds.getRelInfo(qid).getRelDocs().keySet();
+        Set<String> retDocNames = new HashSet<>();
+        for (int i=0; i < Math.min(10, topDocs.scoreDocs.length); i++) {
+            retDocNames.add(reader.document(topDocs.scoreDocs[i].doc).get(TrecDocIndexer.FIELD_ID));
+        }
+
+        float proConRatioRel = proConRatio(relDocNames);
+        float proConRatioRet = proConRatio(retDocNames);
+        return proConRatioRet*proConRatioRel;
+    }
+
+    private float retrieveFairViaKMeansClustering(BufferedWriter bw, TRECQuery query) throws Exception {
+        final float topTermsRatio = Float.parseFloat(getProperties().getProperty("topterms.ratio", "1.0"));
+        // Get the candidate top documents
+        TopDocs topDocs = searcher.search(query.getLuceneQueryObj(), numWanted);
+        // Run a K-means
+        KMeansReranker kMeansReranker = new KMeansReranker(reader, topDocs, 2, topTermsRatio);
+        TopDocs rerankedDocs = kMeansReranker.rerank(numWanted);
+
+        saveRetrievedTuples(bw, query, topDocs);
+        return computeProConRatio(query.id, rerankedDocs);
+
+        //System.out.println("Before rerank:");
+        //System.out.println(ScoreDocUtils.toString(topDocs.scoreDocs));
+        //System.out.println("After rerank");
+        //System.out.println(ScoreDocUtils.toString(rerankedDocs.scoreDocs));
+    }
+
+    private void retrieve(BufferedWriter bw, TRECQuery query, AllRelRcds relRcds) throws Exception {
         String qid = query.id;
         HashMap<String, Float> relDocMap= relRcds.getRelInfo(qid).getRelDocs();
+        Set<String> relDocs =
+                relDocMap
+                .keySet().stream()
+                .collect(Collectors.toSet())
+        ;
 
-        for (String docName: relDocMap.keySet()) {
+        for (String docName: relDocs) {
             Document relDoc = getRelDoc(docName);
             String docText = relDoc.get(TrecDocIndexer.FIELD_ANALYZED_CONTENT);
-            //System.out.println(String.format("Topic + Arg %s:\nTopic: %s\nRel doc: %s", query.id, query.title, docText));
-            Query queryWithArg = extractQueryFromDoc(query.title, docText);
-            System.out.println(String.format("Retrieving with query: %s", queryWithArg));
-            TopDocs topDocs = searcher.search(queryWithArg, numWanted);
+            TopDocs topDocs = retrieveConstrained(query.title, docText);
             saveRetrievedTuples(bw, query.id + "|" + docName, topDocs);
         }
     }
@@ -98,7 +178,14 @@ public class ToucheRetriever extends MsMarcoTopDocs {
         return trecFmtQueries;
     }
 
+    float retrieveBaseline(BufferedWriter bw, TRECQuery query) throws Exception {
+        TopDocs topDocs = retrieve(query);
+        saveRetrievedTuples(bw, query, topDocs);
+        return computeProConRatio(query.id, topDocs);
+    }
+
     public void retrieveAll(List<TRECQuery> queries) throws Exception {
+        TopDocs topDocs;
         boolean constrained = Boolean.parseBoolean(prop.getProperty("retrieval.constrained", "false"));
         String suffix = !constrained? "": ".constrained";
         String resFile = prop.getProperty("res.file") + suffix;
@@ -106,15 +193,13 @@ public class ToucheRetriever extends MsMarcoTopDocs {
         BufferedWriter bw = new BufferedWriter(new FileWriter(resFile));
         System.out.println("Saving results to: " + resFile);
 
+        float aggregateProConRatio = 0;
         for (TRECQuery query : queries) {
-            if (constrained)
-                retrieveForArguments(bw, query, relRcds);
-            else {
-                TopDocs topDocs = retrieve(query);
-                saveRetrievedTuples(bw, query, topDocs);
-            }
+            System.out.print("Retrieving for query " + query.id + "\r");
+            aggregateProConRatio += constrained? retrieveFairViaKMeansClustering(bw, query): retrieveBaseline(bw, query);
         }
         bw.close();
+        System.out.println(String.format("Pro-Con ratio = %.4f", aggregateProConRatio/queries.size()));
     }
 
     public static void main(String[] args) {

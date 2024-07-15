@@ -7,11 +7,9 @@ package org.luc4ir.evaluator;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -24,9 +22,25 @@ import org.luc4ir.indexing.TrecDocIndexer;
  *
  * @author debforit
  */
-class TermFreq {
+class TermFreq implements Comparable<TermFreq> {
     String term;
-    int freq;    
+    float freq;
+
+    TermFreq(String term) {
+        this.term = term;
+        freq = 0;
+    }
+
+    TermFreq(String term, float freq) {
+        this.term = term;
+        this.freq = freq;
+    }
+
+    @Override
+    public int compareTo(TermFreq o) {
+        return Float.compare(freq, o.freq);
+    }
+
 }
 
 /**
@@ -40,65 +54,117 @@ public class DocVector {
     String text;
     HashMap<String, TermFreq> tfMap;
 
-    private void init(String[] retrievedTerms) {
+    private void init(String[] retrievedTerms, IndexReader reader) {
         tfMap = new HashMap<>();
         for (String term : retrievedTerms) {
             TermFreq tf = tfMap.get(term);
             if (tf == null) {
-                tf = new TermFreq();
-                tf.term = term;
-                tf.freq = 0;
+                tf = new TermFreq(term);
             }
             tf.freq++;
             tfMap.put(term, tf);
         }
+
+        try {
+            if (reader != null) {
+                int N = reader.numDocs();
+                for (Map.Entry<String, TermFreq> e : tfMap.entrySet()) {
+                    TermFreq termWt = e.getValue();
+                    int df = reader.docFreq(new Term(TrecDocIndexer.FIELD_ANALYZED_CONTENT, termWt.term));
+                    float idf = (float) Math.log(N / (float) df);
+
+                    termWt.freq = termWt.freq * idf;
+                    //tfMap.put(termWt.term, new TermFreq(termWt.term, termWt.freq));
+                }
+            }
+        }
+        catch (IOException ex) { ex.printStackTrace(); }
+    }
+
+    public DocVector() {
+        text = "";
+        tfMap = new HashMap<>();
+    }
+
+    public DocVector(IndexReader reader, String text) {
+        this(reader, text, 0);
+    }
+
+    public DocVector(IndexReader reader, String text, float topTermsFraction) {
+        this(reader, text, 0);
+
+        int numTermsToKeep = (int)(tfMap.size()*topTermsFraction);
+        tfMap = tfMap
+            .entrySet()
+            .stream()
+            .sorted(Comparator.comparing(e->e.getValue(), Comparator.reverseOrder()))
+            .limit(numTermsToKeep)
+            .collect(
+                Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue,
+                (e1, e2) -> e1,
+                LinkedHashMap::new
+            ))
+        ;
     }
 
     public DocVector(String text, int ngramSize) {
+        this(null, text, ngramSize);
+    }
+
+    public DocVector(String text) {
+        this(null, text, 0);
+    }
+
+    public DocVector(IndexReader reader, String text, int ngramSize) {
         this.text = text;
         String[] retrievedTerms;
-        
-        if (ngramSize == 0)
-            retrievedTerms = analyze(new StandardAnalyzer(), text);
-        else
-            retrievedTerms = analyze(new NGramAnalyzer(ngramSize), text);
-        
-        init(retrievedTerms);
+
+        try {
+            if (ngramSize == 0)
+                retrievedTerms = TrecDocIndexer.analyze(TrecDocIndexer.analyzer(), text).split("\\s+");
+            else
+                retrievedTerms = TrecDocIndexer.analyze(new NGramAnalyzer(ngramSize), text).split("\\s+");
+
+            init(retrievedTerms, reader);
+        }
+        catch (IOException ex) { ex.printStackTrace(); }
+
+    }
+
+    public DocVector (DocVector that) {
+        this.tfMap = new HashMap<>(that.tfMap);
+        this.text = new String(that.text);
+    }
+
+    public void scale(float alpha) {
+        for (Map.Entry<String, TermFreq> e: this.tfMap.entrySet()) {
+            TermFreq termFreq = e.getValue();
+            termFreq.freq *= alpha;
+        }
+    }
+
+    static public DocVector computeCentroid(List<DocVector> vecs) {
+        DocVector cvec = new DocVector();
+        int numVecs = vecs.size();
+        for (DocVector vec: vecs) {
+            for (Map.Entry<String, TermFreq> e: vec.tfMap.entrySet()) {
+                String term = e.getKey();
+                float tf = e.getValue().freq;
+                TermFreq cvec_tf = cvec.tfMap.get(term);
+                if (cvec_tf == null) {
+                    cvec_tf = new TermFreq(term);
+                    cvec.tfMap.put(cvec_tf.term, cvec_tf);
+                }
+                cvec_tf.freq += tf;
+            }
+        }
+        cvec.scale(1/(float)numVecs);
+        return cvec;
     }
     
     public String getText() { return text; }
-    
-    /**
-     * Tokenizes a piece of 'text' (parameter) into a list of tokens
-     * after removing stopwords and stemming (as specified by the parameter
-     * analyzer).
-     * @param analyzer Analyzer object as passed to this function, e.g. EnglishAnalyzer
-     * @param text A piece of text
-     * @return An array of tokens (String objects)
-     */
-    public final String[] analyze(Analyzer analyzer, String text) {
-        
-        List<String> buff = new ArrayList<>();
-        try {
-            TokenStream stream = analyzer.tokenStream("dummy", new StringReader(text));
-            CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
-            stream.reset();
-            while (stream.incrementToken()) {
-                String term = termAtt.toString();
-                buff.add(term);
-            }
-            stream.end();
-            stream.close();
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-        }
-        
-        String[] buffArray = new String[buff.size()];
-        return buff.toArray(buffArray);
-    }
-    
+
     float docLen() {
         float len = 0;
         for (TermFreq tf : tfMap.values()) {

@@ -81,15 +81,8 @@ public class QuerySelector {
         this.windowSize = windowSize;
     }
 
-    public Query constructQuery(String queryText, String text, int nWindows) {
-        String[] queryTextTokens = TrecDocIndexer.analyze(analyzer, queryText).split("\\s+");
+    public Query constructQuery(String text, int nWindows) {
         BooleanQuery.Builder selectedQueryBuilder = new BooleanQuery.Builder();
-        // The original query terms
-        for (String token: queryTextTokens) {
-            TermQuery tq = new TermQuery(new Term(TrecDocIndexer.FIELD_ANALYZED_CONTENT, token));
-            selectedQueryBuilder.add(new BooleanClause(tq, BooleanClause.Occur.SHOULD));
-        }
-
         int start = 0;
         String[] tokens = TrecDocIndexer.analyze(analyzer, text).split("\\s+");
         List<WindowScore> windowScores = new ArrayList<>();
@@ -108,7 +101,7 @@ public class QuerySelector {
                 .limit(nWindows).collect(Collectors.toList());
 
         for (WindowScore bestWindow: topWindows) {
-            System.out.println(bestWindow);
+            //System.out.println(bestWindow);
             // construct the Query object from the best window
             for (String token : bestWindow.tokens) {
                 TermQuery tq = new TermQuery(new Term(TrecDocIndexer.FIELD_ANALYZED_CONTENT, token));
@@ -120,6 +113,6 @@ public class QuerySelector {
 
     // select terms from the desc field
     public Query constructQuery() {
-        return constructQuery("", query.desc, 1);
+        return constructQuery(query.desc, 1);
     }
 }

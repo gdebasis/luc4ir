@@ -10,6 +10,9 @@ public class ResultTuple implements Comparable<ResultTuple> {
         this.rank = rank;
     }
 
+    public String docName() { return docName; }
+    public int rank() { return rank; }
+
     public ResultTuple(String docName, int rank, float rel) {
         this.docName = docName;
         this.rank = rank;
